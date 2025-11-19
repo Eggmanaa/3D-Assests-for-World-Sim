@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
-import GameApp from '../../GameApp';
+import GameApp from '../../../GameApp';
 import { studentAPI, auth } from '../../utils/api';
 
 const GamePage: React.FC = () => {

@@ -9,7 +9,7 @@
     {
       "binding": "DB",
       "database_name": "worldhistorysimulation-db",
-      "database_id": "to-be-created",
+      "database_id": "ab05c467-ae98-4d3a-b526-6ac2a5a9261a",
       "migrations_dir": "./migrations"
     }
   ]
