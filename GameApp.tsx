@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
-import { 
-    Home, Users, Warehouse, Sprout, Hammer, Sword, Shield, 
-    FlaskConical, Palette, Scroll, History, Play, BrickWall, Landmark, Star, Crown, X, Check, Handshake, TowerControl
-} from 'lucide-react';
+import { Play, X, Hammer, FlaskConical, Palette, Sword, History } from 'lucide-react';
 import MapScene from './components/MapScene';
-import { generateMap, CIV_PRESETS, TIMELINE_EVENTS, WONDERS_LIST, RELIGION_TENETS, GENERATE_NEIGHBORS } from './constants';
-import { TileData, TerrainType, BuildingType, BUILDING_COSTS, TERRAIN_BONUSES, GameState, CivPreset, WATER_CAPACITIES, WonderDefinition, TimelineEventAction, StatKey, NeighborCiv } from './types';
+import CivilizationSelector from './src/game/components/CivilizationSelector';
+import StatsPanel from './src/game/components/StatsPanel';
+import ActionPanels from './src/game/components/ActionPanels';
+import { generateMap, TIMELINE_EVENTS, GENERATE_NEIGHBORS } from './constants';
+import { TileData, BuildingType, GameState, CivPreset, WATER_CAPACITIES, TimelineEventAction } from './types';
 import { checkSavingThrow, calculateStats } from './src/game/utils/gameHelpers';
 
 const App: React.FC = () => {
@@ -519,33 +519,7 @@ const App: React.FC = () => {
   // --- RENDER HELPERS ---
 
   if (!gameState.hasStarted) {
-      return (
-          <div className="h-screen w-full bg-slate-900 flex items-center justify-center p-10 font-sans">
-              <div className="max-w-5xl w-full bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-700 flex flex-col max-h-full overflow-hidden">
-                  <h1 className="text-4xl font-bold text-orange-500 mb-2 flex items-center gap-3">
-                      <History size={40} /> Through History
-                  </h1>
-                  <p className="text-slate-400 mb-8">Select a Civilization to begin the simulation.</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto pr-2 custom-scrollbar">
-                      {CIV_PRESETS.map(civ => (
-                          <button key={civ.id} onClick={() => startGame(civ)} className="bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-orange-500/50 p-5 rounded-xl text-left transition-all">
-                              <div className="flex justify-between items-start mb-2">
-                                <h3 className="text-xl font-bold text-slate-100">{civ.name}</h3>
-                                {civ.isIsland && <span className="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded">Island</span>}
-                              </div>
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                  {civ.traits.map(t => <span key={t} className="text-xs font-mono bg-slate-800 text-orange-300 px-2 py-1 rounded border border-slate-600">{t}</span>)}
-                              </div>
-                              <div className="grid grid-cols-2 gap-y-1 text-sm text-slate-400">
-                                  <span>Martial: <b className="text-slate-200">{civ.baseStats.martial}</b></span>
-                                  <span>Industry: <b className="text-slate-200">{civ.baseStats.industry}</b></span>
-                              </div>
-                          </button>
-                      ))}
-                  </div>
-              </div>
-          </div>
-      );
+      return <CivilizationSelector onSelectCivilization={startGame} />;
   }
 
   const { civilization: civ } = gameState;
@@ -663,33 +637,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 flex overflow-hidden">
           {/* LEFT STATS */}
-          <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col z-10 shadow-xl">
-              <div className="p-4 border-b border-slate-800 space-y-4">
-                  <div>
-                      <div className="flex justify-between text-sm mb-1"><span className="text-orange-400 flex items-center gap-2"><Home size={14}/> Houses ({civ.flags.housesSupportTwoPop ? '2x' : '1x'} Pop)</span><span>{civ.stats.houses}/{civ.stats.capacity}</span></div>
-                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden"><div className="bg-orange-500 h-full" style={{ width: `${(civ.stats.houses / civ.stats.capacity) * 100}%` }}></div></div>
-                      <div className="text-xs text-slate-500 mt-1 text-right">Built this turn: {civ.stats.housesBuiltThisTurn}/{civ.stats.fertility}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-slate-800 p-2 rounded border border-slate-700"><div className="text-xs text-slate-400">Industry</div><div className="text-lg font-bold text-amber-400">{civ.stats.industryLeft}</div></div>
-                      <div className="bg-slate-800 p-2 rounded border border-slate-700"><div className="text-xs text-slate-400">Fertility</div><div className="text-lg font-bold text-green-400">{civ.stats.fertility}</div></div>
-                  </div>
-                  <div className="space-y-1 text-sm">
-                      <div className="flex justify-between border-b border-slate-800 pb-1"><span className="text-red-400">Martial</span><b>{civ.stats.martial}</b></div>
-                      <div className="flex justify-between border-b border-slate-800 pb-1"><span className="text-blue-400">Defense</span><b>{civ.stats.defense}</b></div>
-                      <div className="flex justify-between border-b border-slate-800 pb-1"><span className="text-yellow-400">Faith</span><b>{civ.stats.faith}</b></div>
-                      <div className="flex justify-between border-b border-slate-800 pb-1"><span className="text-pink-400">Culture</span><b>{civ.stats.culture}</b></div>
-                      <div className="flex justify-between border-b border-slate-800 pb-1"><span className="text-purple-400">Science</span><b>{civ.stats.science}</b></div>
-                      <div className="flex justify-between border-b border-slate-800 pb-1"><span className="text-cyan-400">Diplomacy</span><b>{civ.stats.diplomacy}</b></div>
-                  </div>
-              </div>
-              {civ.religion.name && (
-                  <div className="p-4 bg-yellow-900/20 m-2 rounded border border-yellow-700/30">
-                      <div className="text-xs text-yellow-500 uppercase font-bold">State Religion</div>
-                      <div className="text-sm font-bold text-yellow-100">{civ.religion.name}</div>
-                  </div>
-              )}
-          </aside>
+          <StatsPanel civilization={civ} />
 
           {/* MAP */}
           <section className="flex-1 relative bg-slate-950">
@@ -706,199 +654,29 @@ const App: React.FC = () => {
           </section>
 
           {/* RIGHT TABBED PANEL */}
-          <aside className="w-80 bg-slate-900 border-l border-slate-800 flex flex-col z-10 shadow-xl">
-               <div className="flex border-b border-slate-800">
-                   {['build', 'wonders', 'religion', 'war'].map(tab => (
-                       <button 
-                           key={tab}
-                           onClick={() => setActiveTab(tab as any)}
-                           className={`flex-1 py-3 flex justify-center items-center text-slate-400 hover:bg-slate-800 transition-colors ${activeTab === tab ? 'border-b-2 border-orange-500 text-orange-500 bg-slate-800' : ''}`}
-                       >
-                           {tab === 'build' && <Hammer size={18} />}
-                           {tab === 'wonders' && <Crown size={18} />}
-                           {tab === 'religion' && <Star size={18} />}
-                           {tab === 'war' && <Sword size={18} />}
-                       </button>
-                   ))}
-               </div>
-
-               <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
-                   {/* BUILD TAB */}
-                   {activeTab === 'build' && (
-                       <div className="space-y-3">
-                           <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Structures</h2>
-                           <button onClick={() => setGameState(p => ({ ...p, selectedAction: BuildingType.House }))} className={`w-full p-3 rounded-lg border text-left flex items-center gap-3 ${gameState.selectedAction === BuildingType.House ? 'bg-orange-900/30 border-orange-500' : 'bg-slate-800 border-slate-700'}`}>
-                               <div className="p-2 bg-orange-600 rounded text-white"><Home size={18}/></div>
-                               <div><div className="font-bold text-sm">House</div><div className="text-xs text-slate-400">Cost: Fertility ({civ.stats.fertility - civ.stats.housesBuiltThisTurn} left)</div></div>
-                           </button>
-                           <button disabled={civ.stats.industryLeft < 10} onClick={() => setGameState(p => ({ ...p, selectedAction: BuildingType.Temple }))} className={`w-full p-3 rounded-lg border text-left flex items-center gap-3 ${gameState.selectedAction === BuildingType.Temple ? 'bg-blue-900/30 border-blue-500' : 'bg-slate-800 border-slate-700'} ${civ.stats.industryLeft < 10 ? 'opacity-50' : ''}`}>
-                               <div className="p-2 bg-blue-600 rounded text-white"><Landmark size={18}/></div>
-                               <div><div className="font-bold text-sm">Temple</div><div className="text-xs text-slate-400">Cost: 10 Ind</div></div>
-                           </button>
-                           <button disabled={civ.stats.industryLeft < 10} onClick={() => setGameState(p => ({ ...p, selectedAction: BuildingType.Wall }))} className={`w-full p-3 rounded-lg border text-left flex items-center gap-3 ${gameState.selectedAction === BuildingType.Wall ? 'bg-slate-700 border-slate-400' : 'bg-slate-800 border-slate-700'} ${civ.stats.industryLeft < 10 ? 'opacity-50' : ''}`}>
-                               <div className="p-2 bg-slate-500 rounded text-white"><BrickWall size={18}/></div>
-                               <div><div className="font-bold text-sm">Wall</div><div className="text-xs text-slate-400">Cost: 10 Ind</div></div>
-                           </button>
-                           <button disabled={civ.stats.industryLeft < 10} onClick={() => setGameState(p => ({ ...p, selectedAction: BuildingType.Amphitheatre }))} className={`w-full p-3 rounded-lg border text-left flex items-center gap-3 ${gameState.selectedAction === BuildingType.Amphitheatre ? 'bg-pink-900/30 border-pink-500' : 'bg-slate-800 border-slate-700'} ${civ.stats.industryLeft < 10 ? 'opacity-50' : ''}`}>
-                               <div className="p-2 bg-pink-600 rounded text-white"><Users size={18}/></div>
-                               <div><div className="font-bold text-sm">Amphitheatre</div><div className="text-xs text-slate-400">Cost: 10 Ind</div></div>
-                           </button>
-                            <button disabled={civ.stats.industryLeft < 20 || civ.stats.science < 30} onClick={() => setGameState(p => ({ ...p, selectedAction: BuildingType.ArchimedesTower }))} className={`w-full p-3 rounded-lg border text-left flex items-center gap-3 ${gameState.selectedAction === BuildingType.ArchimedesTower ? 'bg-purple-900/30 border-purple-500' : 'bg-slate-800 border-slate-700'} ${(civ.stats.industryLeft < 20 || civ.stats.science < 30) ? 'opacity-50' : ''}`}>
-                               <div className="p-2 bg-purple-600 rounded text-white"><TowerControl size={18}/></div>
-                               <div><div className="font-bold text-sm">Archimedes Tower</div><div className="text-xs text-slate-400">Cost: 20 Ind, 30 Sci</div></div>
-                           </button>
-                       </div>
-                   )}
-
-                   {/* WONDERS TAB */}
-                   {activeTab === 'wonders' && (
-                       <div className="space-y-3">
-                           <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Great Wonders</h2>
-                           {WONDERS_LIST.map(w => {
-                               const locked = gameState.year < w.minYear;
-                               const built = civ.builtWonderId === w.id;
-                               const affordable = civ.stats.industryLeft >= w.cost;
-                               return (
-                                   <div key={w.id} className={`p-3 rounded-lg border bg-slate-800 ${built ? 'border-amber-500' : 'border-slate-700'} relative overflow-hidden`}>
-                                       <div className="flex justify-between items-start mb-1">
-                                           <span className="font-bold text-sm">{w.name}</span>
-                                           <span className="text-xs font-mono text-amber-400">{w.cost} Ind</span>
-                                       </div>
-                                       <div className="text-xs text-slate-400 mb-2">{w.effects}</div>
-                                       {built ? (
-                                           <div className="text-xs text-amber-500 font-bold flex items-center gap-1"><Check size={12}/> Constructed</div>
-                                       ) : (
-                                           <button 
-                                               disabled={locked || !affordable || !!civ.builtWonderId}
-                                               onClick={() => buildWonder(w)}
-                                               className="w-full py-1 bg-slate-700 hover:bg-slate-600 text-xs rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                                           >
-                                               {locked ? `Unlocks ${Math.abs(w.minYear)} BCE` : (!affordable ? 'Need Industry' : (civ.builtWonderId ? 'Max 1 Wonder' : 'Build'))}
-                                           </button>
-                                       )}
-                                   </div>
-                               );
-                           })}
-                       </div>
-                   )}
-
-                   {/* RELIGION TAB */}
-                   {activeTab === 'religion' && (
-                       <div className="space-y-4">
-                           <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Theology</h2>
-                           {!civ.flags.religionFound ? (
-                               <div className="p-4 bg-slate-800 rounded border border-slate-700 text-center">
-                                   <p className="text-sm text-slate-300 mb-3">Found a religion to guide your people.</p>
-                                   {civ.flags.israelBonus && <p className="text-xs text-amber-400 mb-2">Israel Bonus: Pick 3 Tenets</p>}
-                                   <div className="space-y-1 text-xs text-slate-500 mb-4">
-                                       <div className={gameState.year >= -1000 || gameState.gameFlags.religionUnlocked ? 'text-green-400' : 'text-red-400'}>• Year 1000 BCE</div>
-                                       <div className={civ.stats.faith >= 10 ? 'text-green-400' : 'text-red-400'}>• 10 Faith</div>
-                                       <div className={civ.buildings.temples >= 1 ? 'text-green-400' : 'text-red-400'}>• 1 Temple</div>
-                                   </div>
-                                   {RELIGION_TENETS.map(t => (
-                                       !civ.religion.tenets.includes(t.id) && (
-                                           <button key={t.id} onClick={() => foundReligion(t.id, 'My Religion')} className="w-full mb-2 p-2 bg-slate-700 hover:bg-slate-600 rounded text-xs text-left">
-                                               <div className="font-bold text-amber-400">{t.name}</div>
-                                               <div className="text-slate-400">{t.description}</div>
-                                           </button>
-                                       )
-                                   ))}
-                                   {civ.religion.tenets.length > 0 && (
-                                       <div className="text-xs text-white mt-2">Selected: {civ.religion.tenets.length}/{civ.flags.israelBonus ? 3 : 1}</div>
-                                   )}
-                               </div>
-                           ) : (
-                               <div className="p-4 bg-slate-800 rounded border border-slate-700">
-                                   <div className="text-center mb-4">
-                                       <Star className="mx-auto text-amber-500 mb-2" />
-                                       <h3 className="font-bold text-lg">{civ.religion.name}</h3>
-                                       <div className="text-xs text-slate-400">Founded {Math.abs(gameState.year)} BCE</div>
-                                   </div>
-                                   <div className="space-y-2">
-                                       {civ.religion.tenets.map(tid => (
-                                           <div key={tid} className="text-sm p-2 bg-slate-900 rounded border border-slate-700">
-                                               <span className="text-amber-500 font-bold">{RELIGION_TENETS.find(t => t.id === tid)?.name}</span>
-                                               <p className="text-xs text-slate-400 mt-1">{RELIGION_TENETS.find(t => t.id === tid)?.description}</p>
-                                           </div>
-                                       ))}
-                                   </div>
-                                   
-                                   <div className="mt-4 pt-4 border-t border-slate-700">
-                                        <h3 className="text-xs font-bold text-slate-500 mb-2">Spread Faith</h3>
-                                        {gameState.neighbors.map(n => (
-                                            <button 
-                                                key={n.id} 
-                                                onClick={() => spreadReligion(n.id)}
-                                                disabled={n.religion === civ.religion.name}
-                                                className="w-full p-2 mb-1 bg-slate-700 hover:bg-slate-600 text-xs rounded flex justify-between disabled:opacity-50"
-                                            >
-                                                <span>{n.name}</span>
-                                                {n.religion === civ.religion.name ? (
-                                                    <span className="text-green-400 flex items-center gap-1"><Check size={12}/> Converted</span>
-                                                ) : (
-                                                    <span className="text-amber-300">{n.faith} Faith</span>
-                                                )}
-                                            </button>
-                                        ))}
-                                   </div>
-                               </div>
-                           )}
-                       </div>
-                   )}
-
-                   {/* WAR TAB */}
-                   {activeTab === 'war' && (
-                       <div className="space-y-3">
-                           <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">War Room</h2>
-                           {(!gameState.gameFlags.warUnlocked && gameState.year < -670) ? (
-                               <div className="p-4 bg-slate-800/50 text-center text-sm text-slate-500 italic border border-slate-700 rounded">
-                                   Warfare unlocks in 670 BCE
-                               </div>
-                           ) : (
-                               gameState.neighbors.map(n => (
-                                   <div key={n.id} className={`p-3 rounded border ${n.isConquered ? 'bg-slate-900 border-slate-800 opacity-50' : n.relationship === 'Ally' ? 'bg-slate-800 border-blue-500' : 'bg-slate-800 border-red-900/50'}`}>
-                                       <div className="flex justify-between items-center mb-2">
-                                           <span className="font-bold text-sm text-slate-200">{n.name}</span>
-                                           {n.isConquered && <span className="text-xs bg-red-900 text-red-200 px-2 rounded">Conquered</span>}
-                                           {n.relationship === 'Ally' && <span className="text-xs bg-blue-900 text-blue-200 px-2 rounded">Ally</span>}
-                                       </div>
-                                       <div className="flex justify-between text-xs text-slate-400 mb-3">
-                                           <span>Strength: <b className="text-red-400">{n.martial + n.defense}</b></span>
-                                           {n.relationship !== 'Ally' && !n.isConquered && (
-                                                <button 
-                                                    onClick={() => formAlliance(n.id)}
-                                                    disabled={civ.stats.diplomacy < 1}
-                                                    className="text-blue-400 hover:text-blue-300 underline flex items-center gap-1"
-                                                >
-                                                    <Handshake size={12}/> Ally
-                                                </button>
-                                           )}
-                                       </div>
-                                       {!n.isConquered && n.relationship !== 'Ally' && (
-                                           <button 
-                                                onClick={() => attackNeighbor(n.id)}
-                                                disabled={civ.stats.martial < 1}
-                                                className="w-full py-2 bg-red-700 hover:bg-red-600 text-white text-xs font-bold rounded shadow-lg shadow-red-900/20"
-                                           >
-                                               ATTACK
-                                           </button>
-                                       )}
-                                   </div>
-                               ))
-                           )}
-                       </div>
-                   )}
-               </div>
-
-               {/* MESSAGE LOG (Fixed at bottom of panel) */}
-               <div className="p-3 bg-slate-950 border-t border-slate-800 text-xs text-slate-400 h-32 overflow-y-auto">
-                   {gameState.messages.map((msg, i) => (
-                       <div key={i} className="mb-1 pb-1 border-b border-slate-900 last:border-0">
-                           <span className="text-slate-600 mr-2">{'>'}</span>{msg}
-                       </div>
-                   ))}
-               </div>
-          </aside>
+          <div className="flex flex-col w-80">
+            <ActionPanels
+              activeTab={activeTab}
+              civilization={civ}
+              gameState={gameState}
+              onSelectAction={(action) => setGameState(p => ({ ...p, selectedAction: action }))}
+              onBuildWonder={buildWonder}
+              onFoundReligion={foundReligion}
+              onSpreadReligion={spreadReligion}
+              onFormAlliance={formAlliance}
+              onDeclareWar={attackNeighbor}
+              onTabChange={setActiveTab}
+            />
+            
+            {/* MESSAGE LOG (Fixed at bottom of panel) */}
+            <div className="p-3 bg-slate-950 border-t border-slate-800 text-xs text-slate-400 h-32 overflow-y-auto">
+              {gameState.messages.map((msg, i) => (
+                <div key={i} className="mb-1 pb-1 border-b border-slate-900 last:border-0">
+                  <span className="text-slate-600 mr-2">{'>'}</span>{msg}
+                </div>
+              ))}
+            </div>
+          </div>
       </main>
     </div>
   );

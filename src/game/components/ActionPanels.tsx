@@ -13,6 +13,7 @@ interface ActionPanelsProps {
   onSpreadReligion: (neighborId: string) => void;
   onFormAlliance: (neighborId: string) => void;
   onDeclareWar: (neighborId: string) => void;
+  onTabChange?: (tab: 'build' | 'wonders' | 'religion' | 'war') => void;
 }
 
 const ActionPanels: React.FC<ActionPanelsProps> = ({
@@ -24,7 +25,8 @@ const ActionPanels: React.FC<ActionPanelsProps> = ({
   onFoundReligion,
   onSpreadReligion,
   onFormAlliance,
-  onDeclareWar
+  onDeclareWar,
+  onTabChange
 }) => {
   return (
     <aside className="w-80 bg-slate-900 border-l border-slate-800 flex flex-col z-10 shadow-xl">
@@ -33,7 +35,7 @@ const ActionPanels: React.FC<ActionPanelsProps> = ({
         {['build', 'wonders', 'religion', 'war'].map(tab => (
           <button 
             key={tab}
-            onClick={() => {/* Handled by parent */}}
+            onClick={() => onTabChange && onTabChange(tab as any)}
             className={`flex-1 py-3 flex justify-center items-center text-slate-400 hover:bg-slate-800 transition-colors ${activeTab === tab ? 'border-b-2 border-orange-500 text-orange-500 bg-slate-800' : ''}`}
           >
             {tab === 'build' && <Hammer size={18} />}
