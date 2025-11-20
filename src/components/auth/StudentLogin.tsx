@@ -62,7 +62,7 @@ const StudentLogin: React.FC = () => {
           </div>
 
           <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">Student Login</h2>
-          <p className="text-gray-600 text-center mb-6">Email</p>
+          <p className="text-gray-600 text-center mb-6">Sign in to your account</p>
 
           {error && (
             <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
@@ -73,7 +73,7 @@ const StudentLogin: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                Username
               </label>
               <div className="relative">
                 <input
@@ -81,7 +81,7 @@ const StudentLogin: React.FC = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-3 bg-blue-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="eggman@bishopdiego.org"
+                  placeholder="your_username"
                   required
                 />
               </div>

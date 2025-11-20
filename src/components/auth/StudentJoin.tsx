@@ -92,7 +92,7 @@ const StudentJoin: React.FC = () => {
                   className="w-full px-4 py-3 bg-blue-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase tracking-widest font-mono"
                   placeholder="ABC123"
                   required
-                  maxLength={6}
+                  maxLength={10}
                 />
               </div>
             </div>
