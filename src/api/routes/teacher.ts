@@ -43,45 +43,70 @@ teacherRoutes.get('/dashboard', async (c) => {
 });
 
 // Create new period
+// Create new period
 teacherRoutes.post('/periods', async (c) => {
   try {
     const teacherId = c.get('userId');
     const { name, startYear, endYear } = await c.req.json();
+
+    console.log('Creating period:', { teacherId, name, startYear, endYear });
+
+    if (!teacherId) {
+      return c.json({ error: 'Unauthorized: Missing teacher ID' }, 401);
+    }
 
     if (!name || !startYear || !endYear) {
       return c.json({ error: 'Missing required fields' }, 400);
     }
 
     // Create the period
-    const result = await c.env.DB.prepare(
-      'INSERT INTO periods (teacher_id, name, start_year, end_year, current_year) VALUES (?, ?, ?, ?, ?)'
-    ).bind(teacherId, name, startYear, endYear, startYear).run();
+    let periodId;
+    try {
+      const result = await c.env.DB.prepare(
+        'INSERT INTO periods (teacher_id, name, start_year, end_year, current_year) VALUES (?, ?, ?, ?, ?)'
+      ).bind(teacherId, name, startYear, endYear, startYear).run();
 
-    const periodId = result.meta.last_row_id;
-
-    // Automatically generate an invite code for the new period
-    let code = generateInviteCode();
-    let attempts = 0;
-
-    // Ensure the code is unique
-    while (attempts < 10) {
-      const existing = await c.env.DB.prepare(
-        'SELECT id FROM invite_codes WHERE code = ?'
-      ).bind(code).first();
-
-      if (!existing) break;
-
-      code = generateInviteCode();
-      attempts++;
+      periodId = result.meta.last_row_id;
+      console.log('Period created with ID:', periodId);
+    } catch (dbError: any) {
+      console.error('Database error creating period:', dbError);
+      return c.json({ error: `Database error: ${dbError.message}` }, 500);
     }
 
-    if (attempts >= 10) {
-      console.error('Failed to generate unique invite code for period:', periodId);
-    } else {
-      // Insert the invite code (unlimited uses, no expiration by default)
-      await c.env.DB.prepare(
-        'INSERT INTO invite_codes (code, teacher_id, period_id, max_uses, expires_at) VALUES (?, ?, ?, ?, ?)'
-      ).bind(code, teacherId, periodId, null, null).run();
+    if (!periodId) {
+      return c.json({ error: 'Failed to retrieve new period ID' }, 500);
+    }
+
+    // Automatically generate an invite code for the new period
+    try {
+      let code = generateInviteCode();
+      let attempts = 0;
+
+      // Ensure the code is unique
+      while (attempts < 10) {
+        const existing = await c.env.DB.prepare(
+          'SELECT id FROM invite_codes WHERE code = ?'
+        ).bind(code).first();
+
+        if (!existing) break;
+
+        code = generateInviteCode();
+        attempts++;
+      }
+
+      if (attempts >= 10) {
+        console.error('Failed to generate unique invite code for period:', periodId);
+        // We don't fail the request here, just log it. The user can generate one manually later.
+      } else {
+        // Insert the invite code (unlimited uses, no expiration by default)
+        await c.env.DB.prepare(
+          'INSERT INTO invite_codes (code, teacher_id, period_id, max_uses, expires_at) VALUES (?, ?, ?, ?, ?)'
+        ).bind(code, teacherId, periodId, null, null).run();
+        console.log('Invite code generated:', code);
+      }
+    } catch (inviteError) {
+      console.error('Error generating invite code:', inviteError);
+      // Don't fail the request if invite code generation fails
     }
 
     const period = await c.env.DB.prepare(
@@ -91,7 +116,7 @@ teacherRoutes.post('/periods', async (c) => {
     return c.json({ period });
   } catch (error: any) {
     console.error('Create period error:', error);
-    return c.json({ error: 'Failed to create period' }, 500);
+    return c.json({ error: `Failed to create period: ${error.message}` }, 500);
   }
 });
 
