@@ -96,244 +96,541 @@ const TeacherDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-slate-700 text-2xl font-medium">Loading...</div>
+      <div
+        className="min-h-screen flex items-center justify-center relative"
+        style={{
+          backgroundImage: 'url(/images/tower-of-babel.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="text-white text-2xl font-medium relative z-10">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
-                <Users className="w-7 h-7 text-white" />
+    <div
+      className="min-h-screen relative"
+      style={{
+        backgroundImage: 'url(/images/tower-of-babel.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-black/30" />
+
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center shadow-md">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-900">Through History - Teacher Dashboard</h1>
+                  <p className="text-slate-600 text-sm">Welcome, {user?.name}!</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Through History - Teacher Dashboard</h1>
-                <p className="text-slate-600 text-sm">Welcome, {user?.name}</p>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors font-medium"
+              >
+                <LogOut className="w-5 h-5" />
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-7 h-7 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-slate-900">{stats.totalStudents}</div>
+                  <div className="text-slate-600 text-sm font-medium">Total Students</div>
+                </div>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors font-medium"
-            >
-              <LogOut className="w-5 h-5" />
-              Logout
-            </button>
+
+            <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-7 h-7 text-amber-600" />
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-slate-900">{stats.totalPeriods}</div>
+                  <div className="text-slate-600 text-sm font-medium">Class Periods</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Clock className="w-7 h-7 text-green-600" />
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-slate-900">{stats.activeSessions}</div>
+                  <div className="text-slate-600 text-sm font-medium">Active Sessions</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Class Periods */}
+          <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg mb-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <Calendar className="w-6 h-6 text-slate-700" />
+                Class Periods
+              </h2>
+              <button
+                onClick={() => setShowPeriodForm(true)}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg transition-colors font-medium shadow-md"
+              >
+                <Plus className="w-5 h-5" />
+                Create New Period
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {periods.length === 0 ? (
+                <div className="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                  <p className="text-slate-500 mb-2">No class periods yet</p>
+                  <button
+                    onClick={() => setShowPeriodForm(true)}
+                    className="text-red-600 font-medium hover:underline"
+                  >
+                    Create your first period
+                  </button>
+                </div>
+              ) : (
+                periods.map((period) => {
+                  const periodInvites = inviteCodes.filter(code => code.period_id === period.id);
+                  const periodStudents = students.filter(s => s.period_id === period.id);
+
+                  return (
+                    <div key={period.id} className="bg-slate-50 p-5 rounded-lg border border-slate-200 hover:border-slate-300 transition-all">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-slate-900 mb-3">{period.name}</h3>
+
+                          <div className="grid grid-cols-2 gap-4 mb-3">
+                            <div className="flex items-center gap-2 text-slate-600">
+                              <Calendar className="w-4 h-4" />
+                              <span className="text-sm">
+                                Invite Code: <span className="font-mono font-bold text-blue-600">{periodInvites[0]?.code || 'None'}</span>
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-600">
+                              <Users className="w-4 h-4" />
+                              <span className="text-sm">Students: <span className="font-bold">{periodStudents.length}</span></span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-sm text-slate-500">
+                            <span>Year: {period.start_year} to {period.end_year}</span>
+                            <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-md font-medium text-xs">
+                              Status: {period.current_year ? 'In Progress' : 'Not Started'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              setSelectedPeriod(period.id);
+                              setShowInviteForm(true);
+                            }}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => handleDeletePeriod(period.id)}
+                            className="px-3 py-2 bg-slate-200 hover:bg-red-100 text-slate-700 hover:text-red-700 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Students Section */}
+          <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg">
+            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <Users className="w-6 h-6 text-slate-700" />
+              Students
+            </h2>
+            <div className="space-y-3">
+              {students.length === 0 ? (
+                <div className="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                  <p className="text-slate-500">No students yet</p>
+                </div>
+              ) : (
+                students.map((student) => (
+                  <div key={student.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex justify-between items-center">
+                    <div>
+                      <h3 className="text-slate-900 font-bold">{student.name}</h3>
+                      <p className="text-slate-600 text-sm">@{student.username} • {student.period_name}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
+      {/* Create Period Modal */}
+      {showPeriodForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-2xl font-bold text-slate-900 mb-6">Create New Period</h3>
+            <form onSubmit={handleCreatePeriod} className="space-y-4">
               <div>
-                <div className="text-3xl font-bold text-slate-900">{stats.totalStudents}</div>
-                <div className="text-slate-600 text-sm">Total Students</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-900">{stats.totalPeriods}</div>
-                <div className="text-slate-600 text-sm">Class Periods</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-900">{stats.activeSessions}</div>
-                <div className="text-slate-600 text-sm">Active Sessions</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Periods */}
-        <div className="bg-white rounded-xl p-6 mb-8 border border-slate-200 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Users className="w-6 h-6 text-slate-700" />
-              Class Periods
-            </h2>
-            <button
-              onClick={() => setShowPeriodForm(true)}
-              className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-colors font-medium shadow-sm"
-            >
-              <Plus className="w-5 h-5" />
-              Create New Period
-            </button>
-          </div>
-
-          {showPeriodForm && (
-            <form onSubmit={handleCreatePeriod} className="bg-slate-50 p-5 rounded-lg mb-6 border border-slate-200">
-              <div className="grid md:grid-cols-3 gap-4 mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Period Name</label>
                 <input
                   type="text"
                   value={periodName}
                   onChange={(e) => setPeriodName(e.target.value)}
-                  placeholder="Period Name (e.g., Period 1)"
-                  className="px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  required
-                />
-                <input
-                  type="number"
-                  value={startYear}
-                  onChange={(e) => setStartYear(Number(e.target.value))}
-                  placeholder="Start Year"
-                  className="px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  required
-                />
-                <input
-                  type="number"
-                  value={endYear}
-                  onChange={(e) => setEndYear(Number(e.target.value))}
-                  placeholder="End Year"
-                  className="px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-blue-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder="Period 1"
                   required
                 />
               </div>
-              <div className="flex gap-3">
-                <button type="submit" className="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium transition-colors">
-                  Create
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Start Year</label>
+                  <input
+                    type="number"
+                    value={startYear}
+                    onChange={(e) => setStartYear(Number(e.target.value))}
+                    className="w-full px-4 py-3 bg-blue-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">End Year</label>
+                  <input
+                    type="number"
+                    value={endYear}
+                    onChange={(e) => setEndYear(Number(e.target.value))}
+                    className="w-full px-4 py-3 bg-blue-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="submit"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                >
+                  Create Period
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowPeriodForm(false)}
-                  className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-medium transition-colors"
+                  className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-3 rounded-lg font-medium transition-colors"
                 >
                   Cancel
                 </button>
               </div>
             </form>
-          )}
-
-          <div className="space-y-3">
-            {periods.map((period) => (
-              <div key={period.id} className="bg-slate-50 p-5 rounded-lg border border-slate-200 flex justify-between items-center hover:border-slate-300 transition-colors">
-                <div>
-                  <h3 className="text-slate-900 font-bold text-lg">{period.name}</h3>
-                  <div className="flex items-center gap-4 mt-1">
-                    <p className="text-slate-600 text-sm flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4" />
-                      Invite Code: <span className="font-mono font-bold text-slate-900">FT1RBBT</span>
-                    </p>
-                    <p className="text-slate-600 text-sm flex items-center gap-1.5">
-                      <Users className="w-4 h-4" />
-                      Students: 1
-                    </p>
-                  </div>
-                  <p className="text-slate-500 text-sm mt-1">
-                    Year: {period.start_year} BCE <span className="text-slate-400">|</span> Status: Paused
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
-                    View
-                  </button>
-                  <button
-                    onClick={() => handleDeletePeriod(period.id)}
-                    className="bg-slate-200 hover:bg-red-50 text-slate-600 hover:text-red-600 p-2 rounded-lg transition-colors"
-                    title="Delete Period"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
+      )}
 
-        {showInviteForm && (
-          <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-            onClick={() => setShowInviteForm(false)}
-          >
-            <div
-              className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 className="text-xl font-bold text-slate-900 mb-4">Generate Invite Code</h3>
-              <form onSubmit={handleGenerateInvite}>
+      {/* Generate Invite Code Modal */}
+      {showInviteForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl">
+            <h3 className="text-2xl font-bold text-slate-900 mb-6">Generate Invite Code</h3>
+            <form onSubmit={handleGenerateInvite} className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-slate-700">
+                  This will generate a new invite code for students to join this period.
+                </p>
+              </div>
+              <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg mb-2 transition-colors font-medium shadow-sm"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
                 >
                   Generate Code
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowInviteForm(false)}
-                  className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-3 rounded-lg transition-colors font-medium"
+                  className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-3 rounded-lg font-medium transition-colors"
                 >
                   Cancel
                 </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Invite Codes */}
-        <div className="bg-white rounded-xl p-6 mb-8 border border-slate-200 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Ticket className="w-6 h-6 text-slate-700" />
-            Invite Codes
-          </h2>
-          <div className="space-y-2">
-            {inviteCodes.map((code) => (
-              <div key={code.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex justify-between items-center">
-                <div>
-                  <span className="text-slate-900 font-mono text-lg font-bold">{code.code}</span>
-                  <span className="text-slate-600 ml-4">({code.period_name})</span>
-                </div>
-                <span className="text-slate-600 text-sm">
-                  {code.current_uses}/{code.max_uses || '∞'} uses
-                </span>
               </div>
-            ))}
+            </form>
           </div>
         </div>
+      )}
+    </div>
+  );
+};
 
-        {/* Students */}
-        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Users className="w-6 h-6 text-slate-700" />
-            Students
-          </h2>
-          <div className="space-y-2">
-            {students.map((student) => (
-              <div key={student.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex justify-between items-center">
-                <div>
-                  <span className="text-slate-900 font-medium">{student.name}</span>
-                  <span className="text-slate-600 ml-4">@{student.username}</span>
-                </div>
-                <span className="text-slate-600 text-sm">{student.period_name}</span>
-              </div>
-            ))}
+export default TeacherDashboard;
+      </div >
+    );
+  }
+
+return (
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    {/* Header */}
+    <div className="bg-white border-b border-slate-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
+              <Users className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">Through History - Teacher Dashboard</h1>
+              <p className="text-slate-600 text-sm">Welcome, {user?.name}</p>
+            </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors font-medium"
+          >
+            <LogOut className="w-5 h-5" />
+            Logout
+          </button>
         </div>
       </div>
     </div>
-  );
+
+    <div className="max-w-7xl mx-auto px-6 py-8">
+      {/* Stats */}
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-slate-900">{stats.totalStudents}</div>
+              <div className="text-slate-600 text-sm">Total Students</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-slate-900">{stats.totalPeriods}</div>
+              <div className="text-slate-600 text-sm">Class Periods</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <Clock className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-slate-900">{stats.activeSessions}</div>
+              <div className="text-slate-600 text-sm">Active Sessions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Periods */}
+      <div className="bg-white rounded-xl p-6 mb-8 border border-slate-200 shadow-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <Users className="w-6 h-6 text-slate-700" />
+            Class Periods
+          </h2>
+          <button
+            onClick={() => setShowPeriodForm(true)}
+            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-colors font-medium shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Create New Period
+          </button>
+        </div>
+
+        {showPeriodForm && (
+          <form onSubmit={handleCreatePeriod} className="bg-slate-50 p-5 rounded-lg mb-6 border border-slate-200">
+            <div className="grid md:grid-cols-3 gap-4 mb-4">
+              <input
+                type="text"
+                value={periodName}
+                onChange={(e) => setPeriodName(e.target.value)}
+                placeholder="Period Name (e.g., Period 1)"
+                className="px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                required
+              />
+              <input
+                type="number"
+                value={startYear}
+                onChange={(e) => setStartYear(Number(e.target.value))}
+                placeholder="Start Year"
+                className="px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                required
+              />
+              <input
+                type="number"
+                value={endYear}
+                onChange={(e) => setEndYear(Number(e.target.value))}
+                placeholder="End Year"
+                className="px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div className="flex gap-3">
+              <button type="submit" className="bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-lg font-medium transition-colors">
+                Create
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowPeriodForm(false)}
+                className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-medium transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className="space-y-3">
+          {periods.map((period) => (
+            <div key={period.id} className="bg-slate-50 p-5 rounded-lg border border-slate-200 flex justify-between items-center hover:border-slate-300 transition-colors">
+              <div>
+                <h3 className="text-slate-900 font-bold text-lg">{period.name}</h3>
+                <div className="flex items-center gap-4 mt-1">
+                  <p className="text-slate-600 text-sm flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4" />
+                    Invite Code: <span className="font-mono font-bold text-slate-900">FT1RBBT</span>
+                  </p>
+                  <p className="text-slate-600 text-sm flex items-center gap-1.5">
+                    <Users className="w-4 h-4" />
+                    Students: 1
+                  </p>
+                </div>
+                <p className="text-slate-500 text-sm mt-1">
+                  Year: {period.start_year} BCE <span className="text-slate-400">|</span> Status: Paused
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm">
+                  View
+                </button>
+                <button
+                  onClick={() => handleDeletePeriod(period.id)}
+                  className="bg-slate-200 hover:bg-red-50 text-slate-600 hover:text-red-600 p-2 rounded-lg transition-colors"
+                  title="Delete Period"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {showInviteForm && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => setShowInviteForm(false)}
+        >
+          <div
+            className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-bold text-slate-900 mb-4">Generate Invite Code</h3>
+            <form onSubmit={handleGenerateInvite}>
+              <button
+                type="submit"
+                className="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg mb-2 transition-colors font-medium shadow-sm"
+              >
+                Generate Code
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowInviteForm(false)}
+                className="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-3 rounded-lg transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Codes */}
+      <div className="bg-white rounded-xl p-6 mb-8 border border-slate-200 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <Ticket className="w-6 h-6 text-slate-700" />
+          Invite Codes
+        </h2>
+        <div className="space-y-2">
+          {inviteCodes.map((code) => (
+            <div key={code.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex justify-between items-center">
+              <div>
+                <span className="text-slate-900 font-mono text-lg font-bold">{code.code}</span>
+                <span className="text-slate-600 ml-4">({code.period_name})</span>
+              </div>
+              <span className="text-slate-600 text-sm">
+                {code.current_uses}/{code.max_uses || '∞'} uses
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Students */}
+      <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <Users className="w-6 h-6 text-slate-700" />
+          Students
+        </h2>
+        <div className="space-y-2">
+          {students.map((student) => (
+            <div key={student.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex justify-between items-center">
+              <div>
+                <span className="text-slate-900 font-medium">{student.name}</span>
+                <span className="text-slate-600 ml-4">@{student.username}</span>
+              </div>
+              <span className="text-slate-600 text-sm">{student.period_name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
 };
 
 export default TeacherDashboard;
