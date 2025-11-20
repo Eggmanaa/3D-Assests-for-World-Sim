@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Users, Calendar, Ticket, Clock } from 'lucide-react';
+import { LogOut, Plus, Users, Calendar, Ticket, Clock, Trash2 } from 'lucide-react';
 import { teacherAPI, auth } from '../../utils/api';
 
 const TeacherDashboard: React.FC = () => {
@@ -77,6 +77,15 @@ const TeacherDashboard: React.FC = () => {
     if (result.data) {
       setShowInviteForm(false);
       loadDashboard();
+    }
+  };
+
+  const handleDeletePeriod = async (periodId: string) => {
+    if (window.confirm('Are you sure you want to delete this period? This action cannot be undone.')) {
+      const result = await teacherAPI.deletePeriod(periodId);
+      if (result.data) {
+        loadDashboard();
+      }
     }
   };
 
@@ -199,14 +208,24 @@ const TeacherDashboard: React.FC = () => {
                     {period.start_year} to {period.end_year} (Current: {period.current_year})
                   </p>
                 </div>
-                <button
-                  onClick={() => { setSelectedPeriod(period.id); setShowInviteForm(true); }}
-                  className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm"
-                >
-                  <Ticket className="w-4 h-4" />
-                  Generate Code
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { setSelectedPeriod(period.id); setShowInviteForm(true); }}
+                    className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm"
+                  >
+                    <Ticket className="w-4 h-4" />
+                    Generate Code
+                  </button>
+                  <button
+                    onClick={() => handleDeletePeriod(period.id)}
+                    className="flex items-center gap-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-2 rounded-lg text-sm transition-colors"
+                    title="Delete Period"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+
             ))}
           </div>
         </div>
@@ -274,7 +293,7 @@ const TeacherDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
