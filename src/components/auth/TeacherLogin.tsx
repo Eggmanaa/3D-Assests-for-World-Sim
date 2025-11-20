@@ -9,106 +9,120 @@ const TeacherLogin: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     const result = await authAPI.teacherLogin(email, password);
-    
+
     if (result.error) {
       setError(result.error);
       setLoading(false);
       return;
     }
-    
+
     if (result.data) {
       auth.setToken(result.data.token);
       auth.setUser(result.data.user);
       navigate('/teacher/dashboard');
     }
-    
+
     setLoading(false);
   };
-  
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-amber-900 to-slate-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: 'url(/images/tower-of-babel.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-black/40" />
+
+      <div className="max-w-md w-full relative z-10">
         <Link
           to="/"
-          className="inline-flex items-center text-amber-400 hover:text-amber-300 mb-6 transition-colors"
+          className="inline-flex items-center text-white hover:text-amber-300 mb-6 transition-colors drop-shadow-lg"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
-          Back to Home
+          ← Back to Home
         </Link>
-        
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-amber-400/30">
+
+        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-200">
           <div className="flex items-center justify-center mb-6">
-            <GraduationCap className="w-16 h-16 text-amber-400" />
+            <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center">
+              <GraduationCap className="w-12 h-12 text-white" />
+            </div>
           </div>
-          
-          <h2 className="text-3xl font-bold text-white text-center mb-2">Teacher Login</h2>
-          <p className="text-gray-300 text-center mb-6">Welcome back! Please sign in to your account.</p>
-          
+
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">Teacher Login</h2>
+          <p className="text-gray-600 text-center mb-6">Email</p>
+
           {error && (
-            <div className="bg-red-500/20 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-6">
+            <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
               {error}
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                  placeholder="teacher@school.edu"
+                  className="w-full px-4 py-3 bg-blue-50 border border-red-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                  placeholder="eggman@bishopdiego.org"
                   required
                 />
               </div>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-                  placeholder="••••••••"
+                  className="w-full px-4 py-3 bg-blue-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                  placeholder="•••••••••"
                   required
                   minLength={6}
                 />
               </div>
             </div>
-            
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-amber-500/50 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+              className="w-full bg-red-500 hover:bg-red-600 disabled:bg-red-400 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Signing in...' : 'Login'}
             </button>
           </form>
-          
+
           <div className="mt-6 text-center">
-            <p className="text-gray-400">
+            <p className="text-gray-600 text-sm">
               Don't have an account?{' '}
-              <Link to="/teacher/register" className="text-amber-400 hover:text-amber-300 font-medium">
+              <Link to="/teacher/register" className="text-red-500 hover:text-red-600 font-medium">
                 Register here
               </Link>
             </p>
+            <Link to="/" className="text-gray-500 hover:text-gray-700 text-sm mt-2 inline-block">
+              ← Back to Home
+            </Link>
           </div>
         </div>
       </div>

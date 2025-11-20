@@ -236,3 +236,46 @@ teacherRoutes.get('/students/:id/progress', async (c) => {
     return c.json({ error: 'Failed to load student progress' }, 500);
   }
 });
+
+// Delete period
+teacherRoutes.delete('/periods/:id', async (c) => {
+  try {
+    const teacherId = c.get('userId');
+    const periodId = c.req.param('id');
+    
+    // Verify period belongs to teacher
+    const period = await c.env.DB.prepare(
+      'SELECT * FROM periods WHERE id = ? AND teacher_id = ?'
+    ).bind(periodId, teacherId).first();
+    
+    if (!period) {
+      return c.json({ error: 'Period not found' }, 404);
+    }
+    
+    // Check if there are students in this period
+    const studentCount = await c.env.DB.prepare(
+      'SELECT COUNT(*) as count FROM students WHERE period_id = ?'
+    ).bind(periodId).first();
+    
+    if (studentCount && (studentCount as any).count > 0) {
+      return c.json({ 
+        error: 'Cannot delete period with active students. Please remove all students first.' 
+      }, 400);
+    }
+    
+    // Delete associated invite codes first
+    await c.env.DB.prepare(
+      'DELETE FROM invite_codes WHERE period_id = ?'
+    ).bind(periodId).run();
+    
+    // Delete the period
+    await c.env.DB.prepare(
+      'DELETE FROM periods WHERE id = ?'
+    ).bind(periodId).run();
+    
+    return c.json({ success: true, message: 'Period deleted successfully' });
+  } catch (error: any) {
+    console.error('Delete period error:', error);
+    return c.json({ error: 'Failed to delete period' }, 500);
+  }
+});
