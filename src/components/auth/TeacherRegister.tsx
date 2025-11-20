@@ -172,6 +172,32 @@ const TeacherRegister: React.FC = () => {
               </Link>
             </p>
           </div>
+
+          {/* Debug Section */}
+          <div className="mt-8 p-4 border-t border-gray-200">
+            <h3 className="text-sm font-bold text-gray-500 mb-2">Debug Info</h3>
+            <div className="flex space-x-2 mb-2">
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/health');
+                    const data = await res.json();
+                    alert(`API Health: ${JSON.stringify(data)}`);
+                  } catch (e: any) {
+                    alert(`API Health Error: ${e.message}`);
+                  }
+                }}
+                className="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+              >
+                Check API Health
+              </button>
+            </div>
+            <div className="text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded">
+              Status: {loading ? 'Submitting...' : error ? 'Error' : 'Ready'}
+              {error && <div className="text-red-500 mt-1">{error}</div>}
+            </div>
+          </div>
         </div>
       </div>
     </div>
