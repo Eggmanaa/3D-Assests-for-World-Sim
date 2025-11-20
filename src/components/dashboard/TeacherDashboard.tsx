@@ -43,19 +43,19 @@ const TeacherDashboard: React.FC = () => {
     ]);
 
     if (dashboardResult.data) {
-      setStats(dashboardResult.data.stats);
+      setStats((dashboardResult.data as any).stats);
     }
 
     if (periodsResult.data) {
-      setPeriods(periodsResult.data.periods);
+      setPeriods((periodsResult.data as any).periods);
     }
 
     if (inviteCodesResult.data) {
-      setInviteCodes(inviteCodesResult.data.inviteCodes);
+      setInviteCodes((inviteCodesResult.data as any).inviteCodes);
     }
 
     if (studentsResult.data) {
-      setStudents(studentsResult.data.students);
+      setStudents((studentsResult.data as any).students);
     }
 
     setLoading(false);
