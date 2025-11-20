@@ -61,13 +61,26 @@ const TeacherDashboard: React.FC = () => {
     setLoading(false);
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleCreatePeriod = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await teacherAPI.createPeriod(periodName, startYear, endYear);
-    if (result.data) {
-      setShowPeriodForm(false);
-      setPeriodName('');
-      loadDashboard();
+    setIsSubmitting(true);
+    try {
+      const result = await teacherAPI.createPeriod(periodName, startYear, endYear);
+      if (result.data) {
+        setShowPeriodForm(false);
+        setPeriodName('');
+        loadDashboard();
+      } else {
+        console.error('Failed to create period:', result.error);
+        alert(`Failed to create period: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error creating period:', error);
+      alert('An unexpected error occurred while creating the period.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -343,9 +356,17 @@ const TeacherDashboard: React.FC = () => {
               <div className="flex gap-3 mt-6">
                 <button
                   type="submit"
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Create Period
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Period'
+                  )}
                 </button>
                 <button
                   type="button"
