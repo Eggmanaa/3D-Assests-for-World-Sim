@@ -11,17 +11,17 @@ const TeacherDashboard: React.FC = () => {
   const [inviteCodes, setInviteCodes] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalStudents: 0, activeSessions: 0, totalPeriods: 0 });
   const [loading, setLoading] = useState(true);
-  
+
   // Create period form
   const [showPeriodForm, setShowPeriodForm] = useState(false);
   const [periodName, setPeriodName] = useState('');
   const [startYear, setStartYear] = useState(-50000);
   const [endYear, setEndYear] = useState(362);
-  
+
   // Create invite code form
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('');
-  
+
   useEffect(() => {
     const userData = auth.getUser();
     if (!userData || userData.role !== 'teacher') {
@@ -31,36 +31,36 @@ const TeacherDashboard: React.FC = () => {
     setUser(userData);
     loadDashboard();
   }, [navigate]);
-  
+
   const loadDashboard = async () => {
     setLoading(true);
-    
+
     const [dashboardResult, periodsResult, inviteCodesResult, studentsResult] = await Promise.all([
       teacherAPI.getDashboard(),
       teacherAPI.getPeriods(),
       teacherAPI.getInviteCodes(),
       teacherAPI.getStudents()
     ]);
-    
+
     if (dashboardResult.data) {
       setStats(dashboardResult.data.stats);
     }
-    
+
     if (periodsResult.data) {
       setPeriods(periodsResult.data.periods);
     }
-    
+
     if (inviteCodesResult.data) {
       setInviteCodes(inviteCodesResult.data.inviteCodes);
     }
-    
+
     if (studentsResult.data) {
       setStudents(studentsResult.data.students);
     }
-    
+
     setLoading(false);
   };
-  
+
   const handleCreatePeriod = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await teacherAPI.createPeriod(periodName, startYear, endYear);
@@ -70,7 +70,7 @@ const TeacherDashboard: React.FC = () => {
       loadDashboard();
     }
   };
-  
+
   const handleGenerateInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await teacherAPI.generateInviteCode(selectedPeriod);
@@ -79,12 +79,12 @@ const TeacherDashboard: React.FC = () => {
       loadDashboard();
     }
   };
-  
+
   const handleLogout = () => {
     auth.logout();
     navigate('/');
   };
-  
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-amber-900 to-slate-900 flex items-center justify-center">
@@ -92,7 +92,7 @@ const TeacherDashboard: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-amber-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -112,7 +112,7 @@ const TeacherDashboard: React.FC = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Stats */}
         <div className="grid md:grid-cols-3 gap-6 mb-6">
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10">
@@ -120,20 +120,20 @@ const TeacherDashboard: React.FC = () => {
             <div className="text-3xl font-bold text-white mb-1">{stats.totalStudents}</div>
             <div className="text-gray-300">Total Students</div>
           </div>
-          
+
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10">
             <Calendar className="w-12 h-12 text-amber-400 mb-3" />
             <div className="text-3xl font-bold text-white mb-1">{stats.totalPeriods}</div>
             <div className="text-gray-300">Class Periods</div>
           </div>
-          
+
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10">
             <Clock className="w-12 h-12 text-amber-400 mb-3" />
             <div className="text-3xl font-bold text-white mb-1">{stats.activeSessions}</div>
             <div className="text-gray-300">Active Sessions</div>
           </div>
         </div>
-        
+
         {/* Periods */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-6 border border-white/10">
           <div className="flex justify-between items-center mb-4">
@@ -146,7 +146,7 @@ const TeacherDashboard: React.FC = () => {
               Create Period
             </button>
           </div>
-          
+
           {showPeriodForm && (
             <form onSubmit={handleCreatePeriod} className="bg-white/5 p-4 rounded-lg mb-4">
               <div className="grid md:grid-cols-3 gap-4 mb-4">
@@ -189,7 +189,7 @@ const TeacherDashboard: React.FC = () => {
               </div>
             </form>
           )}
-          
+
           <div className="space-y-3">
             {periods.map((period) => (
               <div key={period.id} className="bg-white/5 p-4 rounded-lg flex justify-between items-center">
@@ -210,19 +210,28 @@ const TeacherDashboard: React.FC = () => {
             ))}
           </div>
         </div>
-        
+
         {showInviteForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full">
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => setShowInviteForm(false)}
+          >
+            <div
+              className="bg-slate-800 rounded-xl p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-xl font-bold text-white mb-4">Generate Invite Code</h3>
               <form onSubmit={handleGenerateInvite}>
-                <button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-lg mb-2">
+                <button
+                  type="submit"
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-lg mb-2 transition-colors cursor-pointer"
+                >
                   Generate Code
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowInviteForm(false)}
-                  className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg"
+                  className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -230,7 +239,7 @@ const TeacherDashboard: React.FC = () => {
             </div>
           </div>
         )}
-        
+
         {/* Invite Codes */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-6 border border-white/10">
           <h2 className="text-2xl font-bold text-white mb-4">Invite Codes</h2>
@@ -248,7 +257,7 @@ const TeacherDashboard: React.FC = () => {
             ))}
           </div>
         </div>
-        
+
         {/* Students */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10">
           <h2 className="text-2xl font-bold text-white mb-4">Students</h2>

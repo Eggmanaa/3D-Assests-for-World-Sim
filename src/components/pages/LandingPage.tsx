@@ -4,138 +4,119 @@ import { Globe, Clock, GraduationCap, Users, Sparkles, Target, Brain, Trophy } f
 
 const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-amber-900 to-slate-900">
-      {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <div className="flex justify-center items-center gap-4 mb-6">
-            <Globe className="w-16 h-16 text-amber-400 animate-pulse" />
-            <Clock className="w-16 h-16 text-amber-400 animate-pulse" style={{ animationDelay: '0.5s' }} />
+    <div
+      className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
+      style={{
+        backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg/2560px-Pieter_Bruegel_the_Elder_-_The_Tower_of_Babel_%28Vienna%29_-_Google_Art_Project_-_edited.jpg")'
+      }}
+    >
+      {/* Main Card */}
+      <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full overflow-hidden">
+
+        {/* Header Section */}
+        <div className="text-center pt-10 pb-8 px-6">
+          <div className="flex justify-center items-center gap-3 mb-2">
+            <div className="bg-slate-800 p-2 rounded-lg">
+              <Globe className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight">
+              Through History
+            </h1>
           </div>
-          
-          <h1 className="text-6xl font-bold text-white mb-4">
-            Through <span className="text-amber-400">History</span>
-          </h1>
-          
-          <p className="text-2xl text-amber-200 mb-4">
+
+          <p className="text-lg text-slate-600 mb-2">
             A World History Simulation Game for High School Students
           </p>
-          
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-            Build civilizations, manage resources, and survive from 50,000 BCE to 362 CE. 
-            Make strategic decisions that shape the course of history.
+          <p className="text-sm text-slate-400">
+            Build civilizations, manage resources, and survive from 50,000 BCE to 362 CE
           </p>
         </div>
-        
-        {/* Role Selection Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
-          {/* Teacher Card */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-amber-400/30 hover:border-amber-400 transition-all hover:scale-105 hover:shadow-2xl">
-            <div className="flex items-center justify-center mb-6">
-              <GraduationCap className="w-20 h-20 text-amber-400" />
+
+        {/* Split Sections */}
+        <div className="grid md:grid-cols-2 gap-6 px-8 pb-8">
+
+          {/* Teacher Section */}
+          <div className="bg-red-50 rounded-xl p-8 border border-red-100">
+            <div className="flex items-center gap-3 mb-4">
+              <GraduationCap className="w-8 h-8 text-red-800" />
+              <h2 className="text-2xl font-bold text-red-900">Teachers</h2>
             </div>
-            
-            <h2 className="text-3xl font-bold text-white text-center mb-4">Teachers</h2>
-            
-            <p className="text-gray-300 text-center mb-6">
-              Create periods, manage students, and guide them through history
+
+            <p className="text-red-700/80 mb-8 text-sm leading-relaxed">
+              Create periods, manage students, and control the timeline
             </p>
-            
+
             <div className="space-y-3">
               <Link
                 to="/teacher/login"
-                className="block w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
+                className="block w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors shadow-sm"
               >
-                Login
+                Teacher Login
               </Link>
-              
+
               <Link
                 to="/teacher/register"
-                className="block w-full bg-transparent hover:bg-white/10 text-amber-400 font-bold py-3 px-6 rounded-lg text-center border-2 border-amber-400 transition-colors"
+                className="block w-full bg-white hover:bg-red-50 text-red-700 font-bold py-3 px-6 rounded-lg text-center border border-red-200 transition-colors shadow-sm"
               >
-                Register
+                Register as Teacher
               </Link>
             </div>
           </div>
-          
-          {/* Student Card */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-blue-400/30 hover:border-blue-400 transition-all hover:scale-105 hover:shadow-2xl">
-            <div className="flex items-center justify-center mb-6">
-              <Users className="w-20 h-20 text-blue-400" />
+
+          {/* Student Section */}
+          <div className="bg-blue-50 rounded-xl p-8 border border-blue-100">
+            <div className="flex items-center gap-3 mb-4">
+              <Users className="w-8 h-8 text-blue-800" />
+              <h2 className="text-2xl font-bold text-blue-900">Students</h2>
             </div>
-            
-            <h2 className="text-3xl font-bold text-white text-center mb-4">Students</h2>
-            
-            <p className="text-gray-300 text-center mb-6">
-              Join your class and embark on an epic journey through ancient civilizations
+
+            <p className="text-blue-700/80 mb-8 text-sm leading-relaxed">
+              Build your civilization and compete with classmates
             </p>
-            
+
             <div className="space-y-3">
               <Link
                 to="/student/login"
-                className="block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors"
+                className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-center transition-colors shadow-sm"
               >
-                Login
+                Student Login
               </Link>
-              
+
               <Link
                 to="/student/join"
-                className="block w-full bg-transparent hover:bg-white/10 text-blue-400 font-bold py-3 px-6 rounded-lg text-center border-2 border-blue-400 transition-colors"
+                className="block w-full bg-white hover:bg-blue-50 text-blue-600 font-bold py-3 px-6 rounded-lg text-center border border-blue-200 transition-colors shadow-sm"
               >
                 Join with Invite Code
               </Link>
             </div>
           </div>
         </div>
-        
-        {/* Statistics */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 text-center border border-white/10">
-            <div className="text-4xl font-bold text-amber-400 mb-2">30,362</div>
-            <div className="text-gray-300">Years of History</div>
-          </div>
-          
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 text-center border border-white/10">
-            <div className="text-4xl font-bold text-amber-400 mb-2">18+</div>
-            <div className="text-gray-300">Historical Civilizations</div>
-          </div>
-          
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 text-center border border-white/10">
-            <div className="text-4xl font-bold text-amber-400 mb-2">∞</div>
-            <div className="text-gray-300">Strategic Possibilities</div>
-          </div>
-        </div>
-        
-        {/* Features */}
-        <div className="max-w-6xl mx-auto">
-          <h3 className="text-3xl font-bold text-white text-center mb-8">Game Features</h3>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              <Sparkles className="w-12 h-12 text-amber-400 mb-4" />
-              <h4 className="text-xl font-bold text-white mb-2">Build Civilizations</h4>
-              <p className="text-gray-400">Choose from 18+ historical civilizations with unique traits</p>
+
+        {/* Footer Info */}
+        <div className="bg-slate-50 px-8 py-6 border-t border-slate-100">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="bg-slate-800 rounded-full p-1">
+              <Sparkles className="w-3 h-3 text-white" />
             </div>
-            
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              <Target className="w-12 h-12 text-amber-400 mb-4" />
-              <h4 className="text-xl font-bold text-white mb-2">Manage Resources</h4>
-              <p className="text-gray-400">Balance food, production, population, and water</p>
+            <h3 className="font-bold text-slate-800">About the Game</h3>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-purple-600">30,362</div>
+              <div className="text-xs text-slate-500 uppercase tracking-wider mt-1">Years of History</div>
             </div>
-            
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              <Brain className="w-12 h-12 text-amber-400 mb-4" />
-              <h4 className="text-xl font-bold text-white mb-2">Strategic Decisions</h4>
-              <p className="text-gray-400">Face historical events and make impactful choices</p>
+            <div>
+              <div className="text-2xl font-bold text-purple-600">18+</div>
+              <div className="text-xs text-slate-500 uppercase tracking-wider mt-1">Historical Civilizations</div>
             </div>
-            
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              <Trophy className="w-12 h-12 text-amber-400 mb-4" />
-              <h4 className="text-xl font-bold text-white mb-2">Compete & Learn</h4>
-              <p className="text-gray-400">Track progress and compete with classmates</p>
+            <div>
+              <div className="text-2xl font-bold text-purple-600">∞</div>
+              <div className="text-xs text-slate-500 uppercase tracking-wider mt-1">Strategic Possibilities</div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
