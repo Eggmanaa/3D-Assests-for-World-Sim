@@ -5,9 +5,11 @@ import { Bindings } from '../index';
 export const authRoutes = new Hono<{ Bindings: Bindings }>();
 
 // Teacher Registration
+// Teacher Registration
 authRoutes.post('/teacher/register', async (c) => {
   try {
     const { name, email, password } = await c.req.json();
+    console.log('Teacher registration attempt:', { name, email });
 
     // Validation
     if (!name || !email || !password) {
@@ -24,6 +26,7 @@ authRoutes.post('/teacher/register', async (c) => {
     ).bind(email).first();
 
     if (existing) {
+      console.log('Email already registered:', email);
       return c.json({ error: 'Email already registered' }, 400);
     }
 
@@ -36,6 +39,7 @@ authRoutes.post('/teacher/register', async (c) => {
     ).bind(name, email, passwordHash).run();
 
     const teacherId = result.meta.last_row_id;
+    console.log('Teacher registered with ID:', teacherId);
 
     // Generate token
     const token = await generateToken({ userId: teacherId, role: 'teacher' });
@@ -46,7 +50,7 @@ authRoutes.post('/teacher/register', async (c) => {
     });
   } catch (error: any) {
     console.error('Teacher registration error:', error);
-    return c.json({ error: 'Registration failed' }, 500);
+    return c.json({ error: `Registration failed: ${error.message}` }, 500);
   }
 });
 

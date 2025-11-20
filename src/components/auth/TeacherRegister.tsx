@@ -23,21 +23,31 @@ const TeacherRegister: React.FC = () => {
 
     setLoading(true);
 
-    const result = await authAPI.teacherRegister(name, email, password);
+    try {
+      const result = await authAPI.teacherRegister(name, email, password);
 
-    if (result.error) {
-      setError(result.error);
+      if (result.error) {
+        console.error('Registration error:', result.error);
+        setError(result.error);
+        alert(`Registration failed: ${result.error}`);
+        setLoading(false);
+        return;
+      }
+
+      if (result.data) {
+        console.log('Registration successful:', result.data);
+        auth.setToken(result.data.token);
+        auth.setUser(result.data.user);
+        alert('Registration successful! Redirecting to dashboard...');
+        navigate('/teacher/dashboard');
+      }
+    } catch (err) {
+      console.error('Unexpected error during registration:', err);
+      setError('An unexpected error occurred');
+      alert('An unexpected error occurred during registration');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (result.data) {
-      auth.setToken(result.data.token);
-      auth.setUser(result.data.user);
-      navigate('/teacher/dashboard');
-    }
-
-    setLoading(false);
   };
 
   return (
