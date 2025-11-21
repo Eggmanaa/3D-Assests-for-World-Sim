@@ -155,7 +155,7 @@ authRoutes.post('/student/join', async (c) => {
 
     // Find invite code
     const invite = await c.env.DB.prepare(
-      'SELECT id, teacher_id, period_id, max_uses, current_uses, expires_at FROM invite_codes WHERE code = ?'
+      'SELECT id, teacher_id, period_id, max_uses, current_uses FROM invite_codes WHERE code = ?'
     ).bind(inviteCode).first();
 
     console.log('Invite code lookup:', invite ? 'Found' : 'Not found');
@@ -164,10 +164,8 @@ authRoutes.post('/student/join', async (c) => {
       return c.json({ error: 'Invalid invite code' }, 400);
     }
 
-    // Check if invite is still valid
-    if (invite.expires_at && new Date(invite.expires_at as string) < new Date()) {
-      return c.json({ error: 'Invite code expired' }, 400);
-    }
+    // Check if invite has reached maximum uses
+    // Note: expires_at column was removed for database compatibility
 
     if (invite.max_uses && (invite.current_uses as number) >= (invite.max_uses as number)) {
       return c.json({ error: 'Invite code has reached maximum uses' }, 400);

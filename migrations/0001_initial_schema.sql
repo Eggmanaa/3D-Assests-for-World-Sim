@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS invite_codes (
   period_id INTEGER NOT NULL,
   max_uses INTEGER,
   current_uses INTEGER DEFAULT 0,
-  expires_at DATETIME,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE,
   FOREIGN KEY (period_id) REFERENCES periods(id) ON DELETE CASCADE
