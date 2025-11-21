@@ -245,17 +245,61 @@ teacherRoutes.get('/invite-codes', async (c) => {
   }
 });
 
-// Get students
+// Get students with their latest game state
 teacherRoutes.get('/students', async (c) => {
   try {
     const teacherId = c.get('userId');
     const periodId = c.req.query('periodId');
 
-    let query = 'SELECT s.*, p.name as period_name FROM students s LEFT JOIN periods p ON s.period_id = p.id WHERE s.teacher_id = ?';
+    let query = `
+      SELECT 
+        s.*, 
+        p.name as period_name,
+        gs.game_state,
+        gs.civilization_id,
+        gs.updated_at as last_played
+      FROM students s 
+      LEFT JOIN periods p ON s.period_id = p.id 
+      LEFT JOIN game_sessions gs ON s.id = gs.student_id
+      WHERE s.teacher_id = ?
+    `;
+
     const params: any[] = [teacherId];
 
     if (periodId) {
       query += ' AND s.period_id = ?';
+      params.push(periodId);
+    }
+
+    // We only want the latest game session for each student if they have multiple
+    // For simplicity in this query, we'll just grab the one with the max updated_at per student
+    // But since we're selecting * from students, we might get duplicates if we don't group or filter.
+    // A better approach for SQLite:
+
+    query = `
+      SELECT 
+        s.*, 
+        p.name as period_name,
+        gs.game_state,
+        gs.civilization_id,
+        gs.updated_at as last_played
+      FROM students s 
+      LEFT JOIN periods p ON s.period_id = p.id 
+      LEFT JOIN (
+        SELECT student_id, game_state, civilization_id, updated_at
+        FROM game_sessions
+        WHERE (student_id, updated_at) IN (
+          SELECT student_id, MAX(updated_at)
+          FROM game_sessions
+          GROUP BY student_id
+        )
+      ) gs ON s.id = gs.student_id
+      WHERE s.teacher_id = ?
+    `;
+
+    if (periodId) {
+      query += ' AND s.period_id = ?';
+      // params is already [teacherId]
       params.push(periodId);
     }
 

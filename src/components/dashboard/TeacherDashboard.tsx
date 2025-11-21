@@ -20,7 +20,10 @@ const TeacherDashboard: React.FC = () => {
 
   // Create invite code form
   const [showInviteForm, setShowInviteForm] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState('');
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
+
+  // Derived state for the currently selected period object
+  const activePeriod = periods.find(p => p.id === selectedPeriodId);
 
   useEffect(() => {
     const userData = auth.getUser();
@@ -96,11 +99,11 @@ const TeacherDashboard: React.FC = () => {
 
   const handleGenerateInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPeriod) return;
+    if (!selectedPeriodId) return;
 
     setIsSubmitting(true);
     try {
-      const result = await teacherAPI.generateInviteCode(selectedPeriod);
+      const result = await teacherAPI.generateInviteCode(selectedPeriodId);
       if (result.data) {
         setShowInviteForm(false);
         loadDashboard();
@@ -113,6 +116,32 @@ const TeacherDashboard: React.FC = () => {
       alert('An unexpected error occurred while generating the invite code.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleTimelineUpdate = async (action: 'advance' | 'back' | 'resume') => {
+    if (!activePeriod) return;
+
+    // This is a placeholder logic for timeline updates
+    // In a real app, you'd calculate the next year based on game logic
+    let newYear = activePeriod.current_year;
+
+    if (action === 'advance') {
+      newYear += 100; // Advance 100 years
+    } else if (action === 'back') {
+      newYear -= 100; // Go back 100 years
+    }
+
+    // Call API to update
+    try {
+      await teacherAPI.updateTimeline(activePeriod.id, newYear);
+
+      // Optimistic update
+      setPeriods(prev => prev.map(p =>
+        p.id === activePeriod.id ? { ...p, current_year: newYear } : p
+      ));
+    } catch (error) {
+      console.error('Failed to update timeline:', error);
     }
   };
 
@@ -188,152 +217,267 @@ const TeacherDashboard: React.FC = () => {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-6 mb-8">
-            <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-7 h-7 text-blue-600" />
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-slate-900">{stats.totalStudents}</div>
-                  <div className="text-slate-600 text-sm font-medium">Total Students</div>
-                </div>
+          {!activePeriod ? (
+            /* Class Periods List View */
+            <>
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                  <Users className="w-7 h-7 text-slate-700" />
+                  Class Periods
+                </h2>
+                <button
+                  onClick={() => setShowPeriodForm(true)}
+                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg transition-colors font-medium shadow-md"
+                >
+                  <Plus className="w-5 h-5" />
+                  Create New Period
+                </button>
               </div>
-            </div>
 
-            <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-7 h-7 text-amber-600" />
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-slate-900">{stats.totalPeriods}</div>
-                  <div className="text-slate-600 text-sm font-medium">Class Periods</div>
-                </div>
-              </div>
-            </div>
+              <div className="space-y-4">
+                {periods.length === 0 ? (
+                  <div className="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                    <p className="text-slate-500 mb-2">No class periods yet</p>
+                    <button
+                      onClick={() => setShowPeriodForm(true)}
+                      className="text-red-600 font-medium hover:underline"
+                    >
+                      Create your first period
+                    </button>
+                  </div>
+                ) : (
+                  periods.map((period) => {
+                    const periodInvites = inviteCodes.filter(code => code.period_id === period.id);
+                    const periodStudents = students.filter(s => s.period_id === period.id);
+                    const inviteCode = periodInvites[0]?.code || 'None';
 
-            <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Clock className="w-7 h-7 text-green-600" />
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-slate-900">{stats.activeSessions}</div>
-                  <div className="text-slate-600 text-sm font-medium">Active Sessions</div>
-                </div>
-              </div>
-            </div>
-          </div>
+                    return (
+                      <div key={period.id} className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-4">{period.name}</h3>
 
-          {/* Class Periods */}
-          <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg mb-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <Calendar className="w-6 h-6 text-slate-700" />
-                Class Periods
-              </h2>
-              <button
-                onClick={() => setShowPeriodForm(true)}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg transition-colors font-medium shadow-md"
-              >
-                <Plus className="w-5 h-5" />
-                Create New Period
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {periods.length === 0 ? (
-                <div className="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                  <p className="text-slate-500 mb-2">No class periods yet</p>
-                  <button
-                    onClick={() => setShowPeriodForm(true)}
-                    className="text-red-600 font-medium hover:underline"
-                  >
-                    Create your first period
-                  </button>
-                </div>
-              ) : (
-                periods.map((period) => {
-                  const periodInvites = inviteCodes.filter(code => code.period_id === period.id);
-                  const periodStudents = students.filter(s => s.period_id === period.id);
-
-                  return (
-                    <div key={period.id} className="bg-slate-50 p-5 rounded-lg border border-slate-200 hover:border-slate-300 transition-all">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-slate-900 mb-3">{period.name}</h3>
-
-                          <div className="grid grid-cols-2 gap-4 mb-3">
-                            <div className="flex items-center gap-2 text-slate-600">
-                              <Calendar className="w-4 h-4" />
-                              <span className="text-sm">
-                                Invite Code: <span className="font-mono font-bold text-blue-600">{periodInvites[0]?.code || 'None'}</span>
-                              </span>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-slate-600">
+                                <Ticket className="w-4 h-4 text-amber-500" />
+                                <span className="text-sm">Invite Code: <span className="font-bold text-slate-900">{inviteCode}</span></span>
+                              </div>
+                              <div className="flex items-center gap-2 text-slate-600">
+                                <Users className="w-4 h-4 text-blue-500" />
+                                <span className="text-sm">Students: {periodStudents.length}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-slate-600">
+                                <Calendar className="w-4 h-4 text-green-500" />
+                                <span className="text-sm">Year: {period.current_year} BCE</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-slate-600">
+                                <div className="w-4 flex justify-center">
+                                  <div className={`w-2 h-2 rounded-full ${period.current_year ? 'bg-green-500' : 'bg-slate-300'}`} />
+                                </div>
+                                <span className="text-sm">Status: {period.current_year ? 'Paused' : 'Not Started'}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 text-slate-600">
-                              <Users className="w-4 h-4" />
-                              <span className="text-sm">Students: <span className="font-bold">{periodStudents.length}</span></span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm text-slate-500">
-                            <span>Year: {period.start_year} to {period.end_year}</span>
-                            <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded-md font-medium text-xs">
-                              Status: {period.current_year ? 'In Progress' : 'Not Started'}
-                            </span>
                           </div>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 mt-6">
                           <button
-                            onClick={() => {
-                              setSelectedPeriod(period.id);
-                              setShowInviteForm(true);
-                            }}
-                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+                            onClick={() => setSelectedPeriodId(period.id)}
+                            className="flex-1 bg-red-700 hover:bg-red-800 text-white py-2.5 rounded-md font-medium transition-colors flex items-center justify-center gap-2"
                           >
+                            <Users className="w-4 h-4" />
                             View
                           </button>
                           <button
                             onClick={() => handleDeletePeriod(period.id)}
-                            className="px-3 py-2 bg-slate-200 hover:bg-red-100 text-slate-700 hover:text-red-700 rounded-lg transition-colors"
+                            className="px-4 bg-slate-600 hover:bg-slate-700 text-white rounded-md transition-colors flex items-center justify-center"
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                       </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Students Section */}
-          <div className="bg-white/95 backdrop-blur-md rounded-xl p-6 border border-slate-200 shadow-lg">
-            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Users className="w-6 h-6 text-slate-700" />
-              Students
-            </h2>
-            <div className="space-y-3">
-              {students.length === 0 ? (
-                <div className="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                  <p className="text-slate-500">No students yet</p>
-                </div>
-              ) : (
-                students.map((student) => (
-                  <div key={student.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex justify-between items-center">
-                    <div>
-                      <h3 className="text-slate-900 font-bold">{student.name}</h3>
-                      <p className="text-slate-600 text-sm">@{student.username} • {student.period_name}</p>
-                    </div>
+                    );
+                  })
+                )}
+              </div>
+            </>
+          ) : (
+            /* Game Control View */
+            <div className="space-y-6">
+              {/* Header */}
+              <div className="flex justify-between items-center bg-white/95 backdrop-blur-md p-4 rounded-xl border border-slate-200 shadow-sm">
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-slate-800 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">🎮</span>
                   </div>
-                ))
-              )}
+                  {activePeriod.name} - Game Control
+                </h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDeletePeriod(activePeriod.id)}
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Period
+                  </button>
+                  <button
+                    onClick={() => setSelectedPeriodId(null)}
+                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                  >
+                    <span className="text-2xl text-slate-400">×</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Timeline Control */}
+              <div className="bg-blue-50/80 backdrop-blur-md rounded-xl p-8 border border-blue-100 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-900 mb-6">Timeline Control</h3>
+
+                <div className="flex justify-between items-end mb-8">
+                  <div>
+                    <div className="text-5xl font-bold text-purple-600 mb-1">
+                      {Math.abs(activePeriod.current_year)} {activePeriod.current_year < 0 ? 'BCE' : 'CE'}
+                    </div>
+                    <div className="text-slate-500 text-sm font-medium">Current Year</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-4xl font-bold text-blue-600 mb-1">0 / 26</div>
+                    <div className="text-slate-500 text-sm font-medium">Event Progress</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <button
+                    onClick={() => handleTimelineUpdate('advance')}
+                    className="bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span className="text-lg">⏩</span> Advance Timeline
+                  </button>
+                  <button
+                    onClick={() => handleTimelineUpdate('back')}
+                    className="bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span className="text-lg">⏪</span> Go Back
+                  </button>
+                  <button
+                    onClick={() => handleTimelineUpdate('resume')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    <span className="text-lg">▶️</span> Resume
+                  </button>
+                </div>
+              </div>
+
+              {/* Civilizations Table */}
+              <div className="bg-white/95 backdrop-blur-md rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-slate-200">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span className="text-xl">🌐</span> Civilizations ({students.filter(s => s.period_id === activePeriod.id).length})
+                  </h3>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-slate-50 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">
+                        <th className="px-6 py-4">Civilization</th>
+                        <th className="px-6 py-4 text-center">Pop.</th>
+                        <th className="px-6 py-4 text-center">🏠</th>
+                        <th className="px-6 py-4 text-center">⛪</th>
+                        <th className="px-6 py-4 text-center">🎭</th>
+                        <th className="px-6 py-4 text-center">🧱</th>
+                        <th className="px-6 py-4 text-center">🗼</th>
+                        <th className="px-6 py-4 text-center">Wonders</th>
+                        <th className="px-6 py-4 text-center">Religion</th>
+                        <th className="px-6 py-4 text-center">Faith</th>
+                        <th className="px-6 py-4 text-center">Science</th>
+                        <th className="px-6 py-4 text-center">Martial</th>
+                        <th className="px-6 py-4 text-center">Defense</th>
+                        <th className="px-6 py-4 text-center">Achievements</th>
+                        <th className="px-6 py-4 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {students.filter(s => s.period_id === activePeriod.id).length === 0 ? (
+                        <tr>
+                          <td colSpan={15} className="px-6 py-8 text-center text-slate-500">
+                            No civilizations in this period yet.
+                          </td>
+                        </tr>
+                      ) : (
+                        students
+                          .filter(s => s.period_id === activePeriod.id)
+                          .map((student) => {
+                            // Parse game state if available
+                            let stats = {
+                              population: 0,
+                              houses: 0,
+                              temples: 0,
+                              theaters: 0,
+                              walls: 0,
+                              towers: 0,
+                              wonders: '-',
+                              religion: '-',
+                              faith: 0,
+                              science: 0,
+                              martial: 0,
+                              defense: 0,
+                              achievements: '-'
+                            };
+
+                            if (student.game_state) {
+                              try {
+                                const gameState = JSON.parse(student.game_state);
+                                if (gameState.resources) {
+                                  stats.population = gameState.resources.population || 0;
+                                  stats.faith = gameState.resources.faith || 0;
+                                  stats.science = gameState.resources.science || 0;
+                                }
+                                // Add other stats parsing here as they become available in game state
+                              } catch (e) {
+                                console.error('Error parsing game state for student', student.id, e);
+                              }
+                            }
+
+                            return (
+                              <tr key={student.id} className="hover:bg-slate-50 transition-colors">
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-2 h-8 bg-amber-400 rounded-full"></div>
+                                    <div>
+                                      <div className="font-bold text-slate-900">{student.civilization_id || 'Unknown'}</div>
+                                      <div className="text-xs text-slate-500">{student.name}</div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 text-center font-medium text-slate-700">{stats.population}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.houses}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.temples}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.theaters}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.walls}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.towers}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.wonders}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.religion}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.faith}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.science}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.martial}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.defense}</td>
+                                <td className="px-6 py-4 text-center text-slate-600">{stats.achievements}</td>
+                                <td className="px-6 py-4 text-center">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Active
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
