@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, X, Hammer, FlaskConical, Sword, Sprout, Star } from 'lucide-react';
+import { Play, X, Hammer, FlaskConical, Sword, Sprout, Star, RotateCcw } from 'lucide-react';
 import MapScene from './components/MapScene';
 import CivilizationSelector from './src/game/components/CivilizationSelector';
 import StatsPanel from './src/game/components/StatsPanel';
@@ -11,9 +11,10 @@ import { useGameLogic } from './src/game/hooks/useGameLogic';
 interface GameAppProps {
     initialGameState?: GameState;
     onGameStateChange?: (gameState: GameState) => void;
+    isSinglePlayer?: boolean;
 }
 
-const App: React.FC<GameAppProps> = ({ initialGameState, onGameStateChange }) => {
+const App: React.FC<GameAppProps> = ({ initialGameState, onGameStateChange, isSinglePlayer = false }) => {
     const {
         gameState,
         setGameState,
@@ -31,6 +32,18 @@ const App: React.FC<GameAppProps> = ({ initialGameState, onGameStateChange }) =>
         formAlliance,
         attackNeighbor
     } = useGameLogic({ initialGameState, onGameStateChange });
+
+    // Reset game handler for single-player mode
+    const handleResetGame = () => {
+        if (!isSinglePlayer) return;
+
+        if (confirm('Are you sure you want to reset the simulation? This will start a new game and cannot be undone.')) {
+            // Clear the single-player saved game from localStorage
+            localStorage.removeItem('world_sim_direct_save');
+            // Reload the page to restart
+            window.location.reload();
+        }
+    };
 
     // --- RENDER HELPERS ---
 
@@ -146,9 +159,19 @@ const App: React.FC<GameAppProps> = ({ initialGameState, onGameStateChange }) =>
                         {TIMELINE_EVENTS[gameState.timelineIndex]?.name}
                     </div>
                 </div>
-                <button onClick={initiateAdvance} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg shadow-indigo-900/20">
-                    <Play size={16} fill="currentColor" /> Advance Turn
-                </button>
+                <div className="flex items-center gap-3">
+                    {isSinglePlayer && (
+                        <button
+                            onClick={handleResetGame}
+                            className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg shadow-red-900/20 transition-colors"
+                        >
+                            <RotateCcw size={16} /> Reset Simulation
+                        </button>
+                    )}
+                    <button onClick={initiateAdvance} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg shadow-indigo-900/20">
+                        <Play size={16} fill="currentColor" /> Advance Turn
+                    </button>
+                </div>
             </header>
 
             <main className="flex-1 flex overflow-hidden">

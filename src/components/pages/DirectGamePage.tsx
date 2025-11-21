@@ -29,6 +29,7 @@ const DirectGamePage: React.FC = () => {
             <GameApp
                 initialGameState={initialState}
                 onGameStateChange={handleGameStateChange}
+                isSinglePlayer={true}
             />
         </div>
     );
