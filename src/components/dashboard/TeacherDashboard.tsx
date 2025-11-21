@@ -54,7 +54,9 @@ const TeacherDashboard: React.FC = () => {
     }
 
     if (inviteCodesResult.data) {
-      setInviteCodes((inviteCodesResult.data as any).inviteCodes);
+      const codes = (inviteCodesResult.data as any).inviteCodes;
+      console.log('Loaded invite codes:', codes);
+      setInviteCodes(codes);
     }
 
     if (studentsResult.data) {
@@ -193,21 +195,21 @@ const TeacherDashboard: React.FC = () => {
       {/* Content */}
       <div className="relative z-10">
         {/* Header */}
-        <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-          <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-lg">
+          <div className="max-w-7xl mx-auto px-6 py-5">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center shadow-md">
-                  <Users className="w-7 h-7 text-white" />
+                <div className="w-14 h-14 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
+                  <Users className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900">Through History - Teacher Dashboard</h1>
-                  <p className="text-slate-600 text-sm">Welcome, {user?.name}!</p>
+                  <h1 className="text-3xl font-bold text-slate-900">Through History</h1>
+                  <p className="text-slate-600 font-medium">Welcome, {user?.name}!</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors font-medium"
+                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-lg transition-colors font-semibold shadow-sm hover:shadow-md"
               >
                 <LogOut className="w-5 h-5" />
                 Logout
@@ -221,79 +223,147 @@ const TeacherDashboard: React.FC = () => {
             /* Class Periods List View */
             <>
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                  <Users className="w-7 h-7 text-slate-700" />
-                  Class Periods
-                </h2>
+                <div>
+                  <h2 className="text-3xl font-bold text-white flex items-center gap-3 drop-shadow-lg">
+                    <Users className="w-8 h-8" />
+                    Class Periods
+                  </h2>
+                  <p className="text-white/90 mt-1 drop-shadow">Manage your class periods and invite students</p>
+                </div>
                 <button
                   onClick={() => setShowPeriodForm(true)}
-                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg transition-colors font-medium shadow-md"
+                  className="flex items-center gap-2 bg-white hover:bg-slate-50 text-red-600 px-6 py-3 rounded-lg transition-colors font-bold shadow-lg hover:shadow-xl"
                 >
                   <Plus className="w-5 h-5" />
                   Create New Period
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {periods.length === 0 ? (
-                  <div className="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                    <p className="text-slate-500 mb-2">No class periods yet</p>
+                  <div className="col-span-full text-center py-16 bg-white/90 backdrop-blur-md rounded-xl border-2 border-dashed border-slate-300 shadow-sm">
+                    <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="w-10 h-10 text-slate-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">No Class Periods Yet</h3>
+                    <p className="text-slate-500 mb-6">Create your first class period to get started</p>
                     <button
                       onClick={() => setShowPeriodForm(true)}
-                      className="text-red-600 font-medium hover:underline"
+                      className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md"
                     >
-                      Create your first period
+                      <Plus className="w-5 h-5" />
+                      Create First Period
                     </button>
                   </div>
                 ) : (
                   periods.map((period) => {
                     const periodInvites = inviteCodes.filter(code => code.period_id === period.id);
                     const periodStudents = students.filter(s => s.period_id === period.id);
-                    const inviteCode = periodInvites[0]?.code || 'None';
+                    const inviteCode = periodInvites.length > 0 ? periodInvites[0].code : null;
+                    
+                    console.log(`Period ${period.name} (ID: ${period.id}):`, { 
+                      periodInvites, 
+                      inviteCode,
+                      allInviteCodes: inviteCodes 
+                    });
 
                     return (
-                      <div key={period.id} className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-4">{period.name}</h3>
-
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-slate-600">
-                                <Ticket className="w-4 h-4 text-amber-500" />
-                                <span className="text-sm">Invite Code: <span className="font-bold text-slate-900">{inviteCode}</span></span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-600">
-                                <Users className="w-4 h-4 text-blue-500" />
-                                <span className="text-sm">Students: {periodStudents.length}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-600">
-                                <Calendar className="w-4 h-4 text-green-500" />
-                                <span className="text-sm">Year: {period.current_year} BCE</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-slate-600">
-                                <div className="w-4 flex justify-center">
-                                  <div className={`w-2 h-2 rounded-full ${period.current_year ? 'bg-green-500' : 'bg-slate-300'}`} />
-                                </div>
-                                <span className="text-sm">Status: {period.current_year ? 'Paused' : 'Not Started'}</span>
-                              </div>
-                            </div>
+                      <div key={period.id} className="bg-white/95 backdrop-blur-md rounded-xl border border-slate-200 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+                        {/* Header with gradient */}
+                        <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 text-white">
+                          <h3 className="text-2xl font-bold mb-2">{period.name}</h3>
+                          <div className="flex items-center gap-2 text-red-100">
+                            <Calendar className="w-4 h-4" />
+                            <span className="text-sm font-medium">
+                              Year {Math.abs(period.current_year)} {period.current_year < 0 ? 'BCE' : 'CE'}
+                            </span>
                           </div>
                         </div>
 
-                        <div className="flex gap-2 mt-6">
-                          <button
-                            onClick={() => setSelectedPeriodId(period.id)}
-                            className="flex-1 bg-red-700 hover:bg-red-800 text-white py-2.5 rounded-md font-medium transition-colors flex items-center justify-center gap-2"
-                          >
-                            <Users className="w-4 h-4" />
-                            View
-                          </button>
-                          <button
-                            onClick={() => handleDeletePeriod(period.id)}
-                            className="px-4 bg-slate-600 hover:bg-slate-700 text-white rounded-md transition-colors flex items-center justify-center"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
+                        {/* Content */}
+                        <div className="p-6">
+                          {/* Invite Code Section - Prominent Display */}
+                          <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4 mb-4">
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Ticket className="w-6 h-6 text-white" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-xs font-semibold text-amber-900 uppercase tracking-wide mb-1">Invite Code</div>
+                                {inviteCode ? (
+                                  <div className="flex items-center gap-2">
+                                    <code className="text-2xl font-bold text-amber-900 bg-white px-3 py-1 rounded border border-amber-300 tracking-wider">
+                                      {inviteCode}
+                                    </code>
+                                    <button
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(inviteCode);
+                                        alert('Invite code copied to clipboard!');
+                                      }}
+                                      className="text-amber-700 hover:text-amber-900 transition-colors p-2 hover:bg-amber-100 rounded"
+                                      title="Copy to clipboard"
+                                    >
+                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-amber-800">
+                                    <p className="mb-2">No invite code generated yet.</p>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedPeriodId(period.id);
+                                        setShowInviteForm(true);
+                                      }}
+                                      className="text-amber-900 font-semibold hover:underline"
+                                    >
+                                      Generate Code →
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Stats Grid */}
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Users className="w-5 h-5 text-blue-600" />
+                                <span className="text-xs font-semibold text-blue-900 uppercase">Students</span>
+                              </div>
+                              <div className="text-3xl font-bold text-blue-700">{periodStudents.length}</div>
+                            </div>
+                            <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Clock className="w-5 h-5 text-green-600" />
+                                <span className="text-xs font-semibold text-green-900 uppercase">Status</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-3 h-3 rounded-full ${period.current_year ? 'bg-green-500' : 'bg-slate-400'}`} />
+                                <span className="text-sm font-bold text-green-700">{period.current_year ? 'Active' : 'Pending'}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setSelectedPeriodId(period.id)}
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                            >
+                              <Users className="w-5 h-5" />
+                              View Details
+                            </button>
+                            <button
+                              onClick={() => handleDeletePeriod(period.id)}
+                              className="px-4 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-md hover:shadow-lg"
+                              title="Delete Period"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );
