@@ -52,15 +52,50 @@ teacherRoutes.post('/periods', async (c) => {
       return c.json({ error: 'Missing required fields' }, 400);
     }
     
+    // Create the period
     const result = await c.env.DB.prepare(
       'INSERT INTO periods (teacher_id, name, start_year, end_year, current_year) VALUES (?, ?, ?, ?, ?)'
     ).bind(teacherId, name, startYear, endYear, startYear).run();
     
+    const periodId = result.meta.last_row_id;
+    
+    // Automatically generate an invite code for the new period
+    let generatedCode = null;
+    try {
+      let code = generateInviteCode();
+      let attempts = 0;
+
+      // Ensure the code is unique
+      while (attempts < 10) {
+        const existing = await c.env.DB.prepare(
+          'SELECT id FROM invite_codes WHERE code = ?'
+        ).bind(code).first();
+
+        if (!existing) break;
+
+        code = generateInviteCode();
+        attempts++;
+      }
+
+      if (attempts >= 10) {
+        console.error('Failed to generate unique invite code for period:', periodId);
+      } else {
+        // Insert the invite code (unlimited uses, no expiration by default)
+        await c.env.DB.prepare(
+          'INSERT INTO invite_codes (code, teacher_id, period_id, max_uses, expires_at) VALUES (?, ?, ?, ?, ?)'
+        ).bind(code, teacherId, periodId, null, null).run();
+        generatedCode = code;
+        console.log('Auto-generated invite code:', code);
+      }
+    } catch (inviteError: any) {
+      console.error('Error auto-generating invite code:', inviteError);
+    }
+    
     const period = await c.env.DB.prepare(
       'SELECT * FROM periods WHERE id = ?'
-    ).bind(result.meta.last_row_id).first();
+    ).bind(periodId).first();
     
-    return c.json({ period });
+    return c.json({ period, inviteCode: generatedCode });
   } catch (error: any) {
     console.error('Create period error:', error);
     return c.json({ error: 'Failed to create period' }, 500);
