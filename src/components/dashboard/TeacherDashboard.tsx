@@ -71,6 +71,13 @@ const TeacherDashboard: React.FC = () => {
       if (result.data) {
         setShowPeriodForm(false);
         setPeriodName('');
+        
+        // Show success message with auto-generated invite code
+        const inviteCode = (result.data as any).inviteCode;
+        if (inviteCode) {
+          alert(`Period created successfully!\n\nAuto-generated Invite Code: ${inviteCode}\n\nShare this code with your students to let them join this class period.`);
+        }
+        
         loadDashboard();
       } else {
         console.error('Failed to create period:', result.error);
