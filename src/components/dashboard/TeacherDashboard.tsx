@@ -76,7 +76,8 @@ const TeacherDashboard: React.FC = () => {
         // Update state immediately
         setPeriods(prev => [period, ...prev]);
         if (inviteCode) {
-          setInviteCodes(prev => [inviteCode, ...prev]);
+          setInviteCodes(prev => [{ code: inviteCode, period_id: period.id }, ...prev]);
+          alert(`Period created successfully!\n\nAuto-generated Invite Code: ${inviteCode}\n\nShare this code with your students to let them join this class period.`);
         }
 
         // Reload dashboard in background to ensure consistency

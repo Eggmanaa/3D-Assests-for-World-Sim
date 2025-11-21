@@ -83,6 +83,7 @@ teacherRoutes.post('/periods', async (c) => {
     }
 
     // Automatically generate an invite code for the new period
+    let generatedCode = null;
     try {
       let code = generateInviteCode();
       let attempts = 0;
@@ -107,10 +108,11 @@ teacherRoutes.post('/periods', async (c) => {
         await c.env.DB.prepare(
           'INSERT INTO invite_codes (code, teacher_id, period_id, max_uses, expires_at) VALUES (?, ?, ?, ?, ?)'
         ).bind(code, teacherId, periodId, null, null).run();
-        console.log('Invite code generated:', code);
+        generatedCode = code;
+        console.log('Auto-generated invite code:', code);
       }
     } catch (inviteError: any) {
-      console.error('Error generating invite code:', inviteError);
+      console.error('Error auto-generating invite code:', inviteError);
       // Don't fail the request if invite code generation fails, but log it clearly
     }
 
@@ -118,14 +120,7 @@ teacherRoutes.post('/periods', async (c) => {
       'SELECT * FROM periods WHERE id = ?'
     ).bind(periodId).first();
 
-    let inviteCode = null;
-    if (periodId) {
-      inviteCode = await c.env.DB.prepare(
-        'SELECT * FROM invite_codes WHERE period_id = ?'
-      ).bind(periodId).first();
-    }
-
-    return c.json({ period, inviteCode });
+    return c.json({ period, inviteCode: generatedCode });
   } catch (error: any) {
     console.error('Create period error:', error);
     return c.json({ error: `Failed to create period: ${error.message}` }, 500);
