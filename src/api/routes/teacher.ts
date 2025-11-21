@@ -3,7 +3,12 @@ import { teacherAuthMiddleware } from '../middleware/auth';
 import { generateInviteCode } from '../utils/crypto';
 import { Bindings } from '../index';
 
-export const teacherRoutes = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+  userId: number;
+  role: string;
+};
+
+export const teacherRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // Apply auth middleware to all teacher routes
 teacherRoutes.use('/*', teacherAuthMiddleware);
@@ -104,9 +109,9 @@ teacherRoutes.post('/periods', async (c) => {
         ).bind(code, teacherId, periodId, null, null).run();
         console.log('Invite code generated:', code);
       }
-    } catch (inviteError) {
+    } catch (inviteError: any) {
       console.error('Error generating invite code:', inviteError);
-      // Don't fail the request if invite code generation fails
+      // Don't fail the request if invite code generation fails, but log it clearly
     }
 
     const period = await c.env.DB.prepare(
@@ -132,7 +137,7 @@ teacherRoutes.get('/periods', async (c) => {
     return c.json({ periods: periods.results });
   } catch (error: any) {
     console.error('Get periods error:', error);
-    return c.json({ error: 'Failed to load periods' }, 500);
+    return c.json({ error: `Failed to load periods: ${error.message}` }, 500);
   }
 });
 
@@ -164,7 +169,7 @@ teacherRoutes.patch('/periods/:id/timeline', async (c) => {
     return c.json({ success: true, currentYear });
   } catch (error: any) {
     console.error('Update timeline error:', error);
-    return c.json({ error: 'Failed to update timeline' }, 500);
+    return c.json({ error: `Failed to update timeline: ${error.message}` }, 500);
   }
 });
 
@@ -203,7 +208,7 @@ teacherRoutes.post('/invite-codes', async (c) => {
     }
 
     if (attempts >= 10) {
-      return c.json({ error: 'Failed to generate unique code' }, 500);
+      return c.json({ error: 'Failed to generate unique code after 10 attempts' }, 500);
     }
 
     // Insert invite code
@@ -218,7 +223,7 @@ teacherRoutes.post('/invite-codes', async (c) => {
     return c.json({ inviteCode });
   } catch (error: any) {
     console.error('Generate invite code error:', error);
-    return c.json({ error: 'Failed to generate invite code' }, 500);
+    return c.json({ error: `Failed to generate invite code: ${error.message}` }, 500);
   }
 });
 

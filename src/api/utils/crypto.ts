@@ -89,13 +89,16 @@ export async function verifyToken(token: string, secret: string = 'your-secret-k
 }
 
 /**
- * Generate random invite code (7 characters)
+ * Generate random invite code (7 characters) using Web Crypto API
  */
 export function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const randomValues = new Uint8Array(7);
+  crypto.getRandomValues(randomValues);
+
   let code = '';
   for (let i = 0; i < 7; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    code += chars.charAt(randomValues[i] % chars.length);
   }
   return code;
 }
