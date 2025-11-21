@@ -86,10 +86,23 @@ const TeacherDashboard: React.FC = () => {
 
   const handleGenerateInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await teacherAPI.generateInviteCode(selectedPeriod);
-    if (result.data) {
-      setShowInviteForm(false);
-      loadDashboard();
+    if (!selectedPeriod) return;
+
+    setIsSubmitting(true);
+    try {
+      const result = await teacherAPI.generateInviteCode(selectedPeriod);
+      if (result.data) {
+        setShowInviteForm(false);
+        loadDashboard();
+      } else {
+        console.error('Failed to generate invite code:', result.error);
+        alert(`Failed to generate invite code: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error generating invite code:', error);
+      alert('An unexpected error occurred while generating the invite code.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -395,9 +408,17 @@ const TeacherDashboard: React.FC = () => {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Generate Code
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    'Generate Code'
+                  )}
                 </button>
                 <button
                   type="button"
