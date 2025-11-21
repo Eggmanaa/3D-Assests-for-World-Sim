@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Pages
-// import LandingPage from './src/components/pages/LandingPage';
+import LandingPage from './src/components/pages/LandingPage';
 import GamePage from './src/components/pages/GamePage';
 import DirectGamePage from './src/components/pages/DirectGamePage';
 
@@ -20,8 +20,8 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirect root to game */}
-        <Route path="/" element={<Navigate to="/game" replace />} />
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
 
         {/* Direct Game Route (No Auth) */}
         <Route path="/game" element={<DirectGamePage />} />
@@ -39,8 +39,8 @@ const App: React.FC = () => {
         {/* Game Route (Auth) */}
         <Route path="/game/:sessionId" element={<GamePage />} />
 
-        {/* Catch all - redirect to game */}
-        <Route path="*" element={<Navigate to="/game" replace />} />
+        {/* Catch all - redirect to landing */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
