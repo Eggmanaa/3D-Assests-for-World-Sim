@@ -30,9 +30,34 @@ const LandingPage: React.FC = () => {
           <p className="text-xl text-slate-700 mb-2 font-medium">
             A World History Simulation Game for High School Students
           </p>
-          <p className="text-slate-500">
+          <p className="text-slate-500 mb-8">
             Build civilizations, manage resources, and survive from 50,000 BCE to 362 CE
           </p>
+
+          {/* Single Player Button */}
+          <div className="max-w-md mx-auto mb-4">
+            <Link
+              to="/game"
+              className="block w-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 hover:from-orange-600 hover:via-amber-600 hover:to-yellow-600 text-white font-bold py-5 px-8 rounded-2xl text-center transition-all shadow-2xl hover:shadow-orange-500/50 transform hover:scale-105 text-xl relative overflow-hidden group"
+            >
+              <span className="relative z-10 flex items-center justify-center gap-3">
+                <Sparkles className="w-6 h-6" />
+                Start Single Player Game
+                <Sparkles className="w-6 h-6" />
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+            </Link>
+            <p className="text-xs text-slate-500 mt-2 italic">Jump straight into the action - no account needed!</p>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="px-10 pb-4">
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+            <span className="text-slate-400 text-sm font-medium">or join a classroom</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+          </div>
         </div>
 
         {/* Split Sections */}
