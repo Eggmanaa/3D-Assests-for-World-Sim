@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Plus, Users, Calendar, Ticket, Clock, Trash2 } from 'lucide-react';
 import { teacherAPI, auth } from '../../utils/api';
+import AnalyticsView from './AnalyticsView';
 
 const TeacherDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const TeacherDashboard: React.FC = () => {
   // Create invite code form
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'analytics'>('list');
 
   // Derived state for the currently selected period object
   const activePeriod = periods.find(p => p.id === selectedPeriodId);
@@ -261,11 +263,11 @@ const TeacherDashboard: React.FC = () => {
                     const periodInvites = inviteCodes.filter(code => code.period_id === period.id);
                     const periodStudents = students.filter(s => s.period_id === period.id);
                     const inviteCode = periodInvites.length > 0 ? periodInvites[0].code : null;
-                    
-                    console.log(`Period ${period.name} (ID: ${period.id}):`, { 
-                      periodInvites, 
+
+                    console.log(`Period ${period.name} (ID: ${period.id}):`, {
+                      periodInvites,
                       inviteCode,
-                      allInviteCodes: inviteCodes 
+                      allInviteCodes: inviteCodes
                     });
 
                     return (
@@ -480,114 +482,164 @@ const TeacherDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Civilizations Table */}
-              <div className="bg-white/95 backdrop-blur-md rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-slate-200">
-                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <span className="text-xl">🌐</span> Civilizations ({students.filter(s => s.period_id === activePeriod.id).length})
-                  </h3>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-slate-50 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">
-                        <th className="px-6 py-4">Civilization</th>
-                        <th className="px-6 py-4 text-center">Pop.</th>
-                        <th className="px-6 py-4 text-center">🏠</th>
-                        <th className="px-6 py-4 text-center">⛪</th>
-                        <th className="px-6 py-4 text-center">🎭</th>
-                        <th className="px-6 py-4 text-center">🧱</th>
-                        <th className="px-6 py-4 text-center">🗼</th>
-                        <th className="px-6 py-4 text-center">Wonders</th>
-                        <th className="px-6 py-4 text-center">Religion</th>
-                        <th className="px-6 py-4 text-center">Faith</th>
-                        <th className="px-6 py-4 text-center">Science</th>
-                        <th className="px-6 py-4 text-center">Martial</th>
-                        <th className="px-6 py-4 text-center">Defense</th>
-                        <th className="px-6 py-4 text-center">Achievements</th>
-                        <th className="px-6 py-4 text-center">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200">
-                      {students.filter(s => s.period_id === activePeriod.id).length === 0 ? (
-                        <tr>
-                          <td colSpan={15} className="px-6 py-8 text-center text-slate-500">
-                            No civilizations in this period yet.
-                          </td>
-                        </tr>
-                      ) : (
-                        students
-                          .filter(s => s.period_id === activePeriod.id)
-                          .map((student) => {
-                            // Parse game state if available
-                            let stats = {
-                              population: 0,
-                              houses: 0,
-                              temples: 0,
-                              theaters: 0,
-                              walls: 0,
-                              towers: 0,
-                              wonders: '-',
-                              religion: '-',
-                              faith: 0,
-                              science: 0,
-                              martial: 0,
-                              defense: 0,
-                              achievements: '-'
-                            };
-
-                            if (student.game_state) {
-                              try {
-                                const gameState = JSON.parse(student.game_state);
-                                if (gameState.resources) {
-                                  stats.population = gameState.resources.population || 0;
-                                  stats.faith = gameState.resources.faith || 0;
-                                  stats.science = gameState.resources.science || 0;
-                                }
-                                // Add other stats parsing here as they become available in game state
-                              } catch (e) {
-                                console.error('Error parsing game state for student', student.id, e);
-                              }
-                            }
-
-                            return (
-                              <tr key={student.id} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-6 py-4">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-2 h-8 bg-amber-400 rounded-full"></div>
-                                    <div>
-                                      <div className="font-bold text-slate-900">{student.civilization_id || 'Unknown'}</div>
-                                      <div className="text-xs text-slate-500">{student.name}</div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 text-center font-medium text-slate-700">{stats.population}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.houses}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.temples}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.theaters}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.walls}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.towers}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.wonders}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.religion}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.faith}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.science}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.martial}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.defense}</td>
-                                <td className="px-6 py-4 text-center text-slate-600">{stats.achievements}</td>
-                                <td className="px-6 py-4 text-center">
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    Active
-                                  </span>
-                                </td>
-                              </tr>
-                            );
-                          })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+              {/* Tabs */}
+              <div className="flex gap-4 border-b border-slate-200">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`pb-3 px-4 font-bold text-sm transition-colors relative ${viewMode === 'list' ? 'text-red-600' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                  Civilizations List
+                  {viewMode === 'list' && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600 rounded-t-full" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setViewMode('analytics')}
+                  className={`pb-3 px-4 font-bold text-sm transition-colors relative ${viewMode === 'analytics' ? 'text-red-600' : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                  Analytics & Charts
+                  {viewMode === 'analytics' && (
+                    <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-600 rounded-t-full" />
+                  )}
+                </button>
               </div>
+
+              {/* Content Area */}
+              {viewMode === 'analytics' ? (
+                <AnalyticsView
+                  students={students.filter(s => s.period_id === activePeriod.id)}
+                  periodName={activePeriod.name}
+                />
+              ) : (
+                /* Civilizations Table */
+                <div className="bg-white/95 backdrop-blur-md rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-4 border-b border-slate-200">
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                      <span className="text-xl">🌐</span> Civilizations ({students.filter(s => s.period_id === activePeriod.id).length})
+                    </h3>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-slate-50 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">
+                          <th className="px-6 py-4">Civilization</th>
+                          <th className="px-6 py-4 text-center">Pop.</th>
+                          <th className="px-6 py-4 text-center">🏠</th>
+                          <th className="px-6 py-4 text-center">⛪</th>
+                          <th className="px-6 py-4 text-center">🎭</th>
+                          <th className="px-6 py-4 text-center">🧱</th>
+                          <th className="px-6 py-4 text-center">🗼</th>
+                          <th className="px-6 py-4 text-center">Wonders</th>
+                          <th className="px-6 py-4 text-center">Religion</th>
+                          <th className="px-6 py-4 text-center">Faith</th>
+                          <th className="px-6 py-4 text-center">Science</th>
+                          <th className="px-6 py-4 text-center">Martial</th>
+                          <th className="px-6 py-4 text-center">Defense</th>
+                          <th className="px-6 py-4 text-center">Achievements</th>
+                          <th className="px-6 py-4 text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {students.filter(s => s.period_id === activePeriod.id).length === 0 ? (
+                          <tr>
+                            <td colSpan={15} className="px-6 py-8 text-center text-slate-500">
+                              No civilizations in this period yet.
+                            </td>
+                          </tr>
+                        ) : (
+                          students
+                            .filter(s => s.period_id === activePeriod.id)
+                            .map((student) => {
+                              // Parse game state if available
+                              let stats = {
+                                population: 0,
+                                houses: 0,
+                                temples: 0,
+                                theaters: 0,
+                                walls: 0,
+                                towers: 0,
+                                wonders: '-',
+                                religion: '-',
+                                faith: 0,
+                                science: 0,
+                                martial: 0,
+                                defense: 0,
+                                achievements: '-'
+                              };
+
+                              if (student.game_state) {
+                                try {
+                                  const gameState = JSON.parse(student.game_state);
+                                  if (gameState.civilization && gameState.civilization.stats) {
+                                    const civStats = gameState.civilization.stats;
+                                    const civBuildings = gameState.civilization.buildings || {};
+
+                                    stats.population = civStats.population || 0;
+                                    stats.houses = civStats.houses || 0;
+                                    stats.faith = civStats.faith || 0;
+                                    stats.science = civStats.science || 0;
+                                    stats.martial = civStats.martial || 0;
+                                    stats.defense = civStats.defense || 0;
+
+                                    stats.temples = civBuildings.temples || 0;
+                                    stats.theaters = civBuildings.amphitheatres || 0;
+                                    stats.walls = civBuildings.walls || 0;
+                                    stats.towers = civBuildings.archimedes_towers || 0;
+
+                                    if (gameState.civilization.religion && gameState.civilization.religion.name) {
+                                      stats.religion = gameState.civilization.religion.name;
+                                    }
+
+                                    if (gameState.civilization.builtWonderId) {
+                                      stats.wonders = gameState.civilization.builtWonderId;
+                                    }
+                                  }
+                                } catch (e) {
+                                  console.error('Error parsing game state for student', student.id, e);
+                                }
+                              }
+
+                              return (
+                                <tr key={student.id} className="hover:bg-slate-50 transition-colors">
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-2 h-8 bg-amber-400 rounded-full"></div>
+                                      <div>
+                                        <div className="font-bold text-slate-900">{student.civilization_id || 'Unknown'}</div>
+                                        <div className="text-xs text-slate-500">{student.name}</div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 text-center font-medium text-slate-700">{stats.population}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.houses}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.temples}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.theaters}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.walls}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.towers}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.wonders}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.religion}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.faith}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.science}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.martial}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.defense}</td>
+                                  <td className="px-6 py-4 text-center text-slate-600">{stats.achievements}</td>
+                                  <td className="px-6 py-4 text-center">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      Active
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
