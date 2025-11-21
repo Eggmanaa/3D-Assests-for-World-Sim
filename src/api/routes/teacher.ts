@@ -105,9 +105,10 @@ teacherRoutes.post('/periods', async (c) => {
         // We don't fail the request here, just log it. The user can generate one manually later.
       } else {
         // Insert the invite code (unlimited uses, no expiration by default)
+        // Note: We omit expires_at to avoid schema mismatch issues
         await c.env.DB.prepare(
-          'INSERT INTO invite_codes (code, teacher_id, period_id, max_uses, expires_at) VALUES (?, ?, ?, ?, ?)'
-        ).bind(code, teacherId, periodId, null, null).run();
+          'INSERT INTO invite_codes (code, teacher_id, period_id, max_uses) VALUES (?, ?, ?, ?)'
+        ).bind(code, teacherId, periodId, null).run();
         generatedCode = code;
         console.log('Auto-generated invite code:', code);
       }
@@ -214,9 +215,10 @@ teacherRoutes.post('/invite-codes', async (c) => {
     }
 
     // Insert invite code
+    // Note: We omit expires_at to avoid schema mismatch issues
     const result = await c.env.DB.prepare(
-      'INSERT INTO invite_codes (code, teacher_id, period_id, max_uses, expires_at) VALUES (?, ?, ?, ?, ?)'
-    ).bind(code, teacherId, periodId, maxUses || null, expiresAt || null).run();
+      'INSERT INTO invite_codes (code, teacher_id, period_id, max_uses) VALUES (?, ?, ?, ?)'
+    ).bind(code, teacherId, periodId, maxUses || null).run();
 
     const inviteCode = await c.env.DB.prepare(
       'SELECT * FROM invite_codes WHERE id = ?'

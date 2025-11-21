@@ -80,7 +80,8 @@ const TeacherDashboard: React.FC = () => {
         setPeriods(prev => [period, ...prev]);
         if (inviteCode) {
           setInviteCodes(prev => [{ code: inviteCode, period_id: period.id }, ...prev]);
-          alert(`Period created successfully!\n\nAuto-generated Invite Code: ${inviteCode}\n\nShare this code with your students to let them join this class period.`);
+          setInviteCodes(prev => [{ code: inviteCode, period_id: period.id }, ...prev]);
+          // Alert removed - code will be visible in the dashboard
         }
 
         // Reload dashboard in background to ensure consistency
@@ -326,6 +327,47 @@ const TeacherDashboard: React.FC = () => {
                   >
                     <span className="text-2xl text-slate-400">×</span>
                   </button>
+                </div>
+              </div>
+
+              {/* Invite Code Card */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+                    <Ticket className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-bold text-amber-800 uppercase tracking-wider mb-1">Invite Code</h3>
+                    {inviteCodes.find(ic => ic.period_id === activePeriod.id)?.code ? (
+                      <div className="flex items-center gap-3">
+                        <div className="text-3xl font-bold text-slate-900 tracking-widest font-mono">
+                          {inviteCodes.find(ic => ic.period_id === activePeriod.id)?.code}
+                        </div>
+                        <button
+                          onClick={() => {
+                            const code = inviteCodes.find(ic => ic.period_id === activePeriod.id)?.code;
+                            if (code) {
+                              navigator.clipboard.writeText(code);
+                              alert('Code copied to clipboard!');
+                            }
+                          }}
+                          className="text-sm text-amber-700 hover:text-amber-900 underline font-medium"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-amber-900 mb-2">No invite code generated yet.</p>
+                        <button
+                          onClick={() => setShowInviteForm(true)}
+                          className="text-amber-700 hover:text-amber-900 font-bold flex items-center gap-1"
+                        >
+                          Generate Code →
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
