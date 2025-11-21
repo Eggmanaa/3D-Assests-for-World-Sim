@@ -69,8 +69,17 @@ const TeacherDashboard: React.FC = () => {
     try {
       const result = await teacherAPI.createPeriod(periodName, startYear, endYear);
       if (result.data) {
+        const { period, inviteCode } = result.data as any;
         setShowPeriodForm(false);
         setPeriodName('');
+
+        // Update state immediately
+        setPeriods(prev => [period, ...prev]);
+        if (inviteCode) {
+          setInviteCodes(prev => [inviteCode, ...prev]);
+        }
+
+        // Reload dashboard in background to ensure consistency
         loadDashboard();
       } else {
         console.error('Failed to create period:', result.error);

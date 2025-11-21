@@ -118,7 +118,14 @@ teacherRoutes.post('/periods', async (c) => {
       'SELECT * FROM periods WHERE id = ?'
     ).bind(periodId).first();
 
-    return c.json({ period });
+    let inviteCode = null;
+    if (periodId) {
+      inviteCode = await c.env.DB.prepare(
+        'SELECT * FROM invite_codes WHERE period_id = ?'
+      ).bind(periodId).first();
+    }
+
+    return c.json({ period, inviteCode });
   } catch (error: any) {
     console.error('Create period error:', error);
     return c.json({ error: `Failed to create period: ${error.message}` }, 500);
