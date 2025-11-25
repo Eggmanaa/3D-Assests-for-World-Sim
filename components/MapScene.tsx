@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, SoftShadows } from '@react-three/drei';
 import { TileData, BuildingType } from '../types';
-import { HexTile3D, House3D, Temple3D, Wall3D, Amphitheatre3D } from './Models';
+import { HexTile3D, House3D, Temple3D, Wall3D, Amphitheatre3D, ArchimedesTower3D } from './Models';
 
 interface MapSceneProps {
   tiles: TileData[];
@@ -55,6 +55,7 @@ const MapScene: React.FC<MapSceneProps> = ({ tiles, onTileClick }) => {
                 {tile.building === BuildingType.Temple && <Temple3D position={[tile.x, 0, tile.z]} />}
                 {tile.building === BuildingType.Wall && <Wall3D position={[tile.x, 0, tile.z]} />}
                 {tile.building === BuildingType.Amphitheatre && <Amphitheatre3D position={[tile.x, 0, tile.z]} />}
+                {tile.building === BuildingType.ArchimedesTower && <ArchimedesTower3D position={[tile.x, 0, tile.z]} />}
             </group>
           ))}
         </group>
